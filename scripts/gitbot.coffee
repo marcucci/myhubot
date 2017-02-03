@@ -25,6 +25,10 @@ module.exports = (robot) ->
       if targetissue.number is target
           res.reply("Unable to find target issue. Looking for #{target} and found #{targetissue.number}")
           return
+      for label, x in targetissue.labels
+        if label.name is "epic"
+          res.reply("Your target issue is an epic. It can not have a parent.")
+          return
 
     # see if items exist
     github.get "https://api.github.com/repos/#{owner}/#{repo}/issues/#{source}", (sourceissue) ->
@@ -33,7 +37,7 @@ module.exports = (robot) ->
           return
 
 # use https://developer.github.com/v3/issues/comments/ to post a comments
-    res.reply "If I worked I'd link  ##{source} to ##{target} making a post to #{url}"
+    res.reply "If I worked I'd link  ##{source} to ##{target}."
 
 # general purpose scrtips
 
