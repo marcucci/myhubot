@@ -2,14 +2,13 @@
   "name": "gitbot",
   "version": "0.0.0",
   "private": true,
-
   "author": "dmarcucci@gmail.com",
-
   "description": "A bot to help with github",
-
   "dependencies": {
+    "generator-hubot": "^0.4.0",
+    "githubot": "^1.0.1",
+    "yo": "^1.8.5"
   },
-
   "engines": {
     "node": "0.10.x"
   }
