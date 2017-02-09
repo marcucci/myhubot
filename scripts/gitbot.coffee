@@ -36,8 +36,36 @@ module.exports = (robot) ->
           res.reply("Unable to find source issue.")
           return
 
-# use https://developer.github.com/v3/issues/comments/ to post a comments
-    res.reply "If I worked I'd link  ##{source} to ##{target}."
+    # use https://developer.github.com/v3/issues/comments/ to post a comments
+      res.reply "If I worked I'd link  ##{source} to ##{target}."
+
+# Get Issue details
+  robot.respond /info issue #?([0-9]+)/i, (res) ->
+    id = res.match[1]
+    owner   = "marcucci"
+    repo    = "test"
+    url     = "https://api.github.com/repos/#{owner}/#{repo}/issues/#{id}"
+
+    # see if items exist
+    github.get "#{url}", (issue) ->
+
+      reply = "Here's the info you requested.\n"
+      reply = reply + "Issue title: #{issue.title}\n"
+      reply = reply + "Issue status: #{issue.state}\n"
+
+      # Determine story points & Story type
+      for label, x in issue.labels
+        if label.name.includes("story points")
+          storypoints = label.name.split(": ")
+          reply = reply + "Assigned story points: #{storypoints[1]}\n"
+        else
+          reply = reply + "No story points assigned.\n"
+        if label.name in ["epic","user story","spike"]
+          reply = reply + "Issue type: #{label.name}\n"
+
+
+
+      res.reply "\n#{reply}"
 
 # general purpose scrtips
 
