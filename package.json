@@ -5,6 +5,7 @@
   "author": "dmarcucci@gmail.com",
   "description": "A bot to help with github",
   "dependencies": {
+    "agilemanager-api": "^1.0.1",
     "generator-hubot": "^0.4.0",
     "githubot": "^1.0.1",
     "hubot-auth": "^2.1.0",
