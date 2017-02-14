@@ -3,14 +3,15 @@
 #
 
 github = require('githubot')
+github_api_url = process.env.github_api_url
+owner = process.env.github_owner
+repo = process.env.github_repo
 
 module.exports = (robot) ->
 
   robot.respond /link issue #?([0-9]+) to #?([0-9]+)/i, (res) ->
     source  = res.match[1]
     target  = res.match[2]
-    owner   = "marcucci"
-    repo    = "test"
     url     = "/repos/#{owner}/#{repo}/issues/#{source}/comments"
     source_message = {"body": "Linked this item to ##{target}"}
     target_message = {"body": "Linked this item from ##{source}"}
@@ -21,7 +22,7 @@ module.exports = (robot) ->
       return
 
     # see if items exist
-    github.get "https://api.github.com/repos/#{owner}/#{repo}/issues/#{target}", (targetissue) ->
+    github.get "#{github_api_url}/repos/#{owner}/#{repo}/issues/#{target}", (targetissue) ->
       if targetissue.number is target
           res.reply("Unable to find target issue. Looking for #{target} and found #{targetissue.number}")
           return
@@ -31,7 +32,7 @@ module.exports = (robot) ->
           return
 
     # see if items exist
-    github.get "https://api.github.com/repos/#{owner}/#{repo}/issues/#{source}", (sourceissue) ->
+    github.get "#{github_api_url}/repos/#{owner}/#{repo}/issues/#{source}", (sourceissue) ->
       if sourceissue.number is source
           res.reply("Unable to find source issue.")
           return
@@ -42,29 +43,26 @@ module.exports = (robot) ->
 # Get Issue details
   robot.respond /info issue #?([0-9]+)/i, (res) ->
     id = res.match[1]
-    owner   = "marcucci"
-    repo    = "test"
-    url     = "https://api.github.com/repos/#{owner}/#{repo}/issues/#{id}"
+    url     = "#{github_api_url}/repos/#{owner}/#{repo}/issues/#{id}"
 
     # see if items exist
+    #console.log "Looking at #{url}"
+
     github.get "#{url}", (issue) ->
 
       reply = "Here's the info you requested.\n"
       reply = reply + "Issue title: #{issue.title}\n"
       reply = reply + "Issue status: #{issue.state}\n"
+      storypoints = ["not assigned"]
 
       # Determine story points & Story type
       for label, x in issue.labels
         if label.name.includes("story points")
           storypoints = label.name.split(": ")
-          reply = reply + "Assigned story points: #{storypoints[1]}\n"
-        else
-          reply = reply + "No story points assigned.\n"
         if label.name in ["epic","user story","spike"]
           reply = reply + "Issue type: #{label.name}\n"
 
-
-
+      reply = reply + "Assigned story points: #{storypoints[1]}\n"
       res.reply "\n#{reply}"
 
 # general purpose scrtips
