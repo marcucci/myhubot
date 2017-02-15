@@ -5,6 +5,7 @@
 //  agm test - test connection to Agile Manager
 //  show agm <id> - show details about a specific backlog item
 //  list agm themes - show a lit of all agile manager themes
+//  agm test create - create a single use story as a test
 
 var workspaceId = '1003';
 
