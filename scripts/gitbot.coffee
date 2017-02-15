@@ -65,6 +65,20 @@ module.exports = (robot) ->
       reply = reply + "Assigned story points: #{storypoints[1]}\n"
       res.reply "\n#{reply}"
 
+# List comments with agile linkage
+  robot.respond /agm linkage on #?([0-9]+)/i, (res) ->
+    id = res.match[1]
+    url = "#{github_api_url}/repos/#{owner}/#{repo}/issues/#{id}/comments"
+
+    github.get "#{url}", (comments) ->
+
+      for comment, x in comments
+        if comment.body.includes("Linked to Agile Manager ID #")
+          agmId = comment.body.split("#")
+          res.reply "Linkage found. Linked to #{agmId[1]} in Agile Manager."
+      if not (agmId)
+        res.reply "No Linkage found."
+
 # general purpose scrtips
 
   robot.hear /^hubot:? (.+)/i, (res) ->
