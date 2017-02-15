@@ -118,6 +118,9 @@ module.exports = function(robot) {
             name: 'Test user story from Hubot',
             subtype: 'user_story',
             story_points: '3',
+            application_id: '53',
+            team_id: '159',
+            status: 'New' //New, In Progress, In Testing, or Done
         }]
     };
     agm.resource(resourceOptions, function(err, body) {
@@ -127,10 +130,13 @@ module.exports = function(robot) {
       } else {
         replymsg = "Item created. Details follow:\n";
         replymsg = replymsg + "-------------------------\n";
-        replymsg = replymsg + "Item id: " + body.data[0].id +"\n";
+        replymsg = replymsg + "API id: " + body.data[0].id +"\n";
+        replymsg = replymsg + "Item id: " + body.data[0].item_id +"\n";
         replymsg = replymsg + "Subtype: " + body.data[0].subtype +"\n";
         replymsg = replymsg + "Name: " + body.data[0].name +"\n";
         replymsg = replymsg + "Status: " + body.data[0].status +"\n";
+        replymsg = replymsg + "Team id: " + body.data[0].team_id +"\n";
+        replymsg = replymsg + "Story Points: " + body.data[0].story_points +"\n";
       };
       return res.reply(replymsg);
     });
