@@ -135,7 +135,7 @@ module.exports = function(robot) {
         replymsg = replymsg + "Subtype: " + body.data[0].subtype +"\n";
         replymsg = replymsg + "Name: " + body.data[0].name +"\n";
         replymsg = replymsg + "Status: " + body.data[0].status +"\n";
-        replymsg = replymsg + "Team id: " + body.data[0].team_id +"\n";
+        replymsg = replymsg + "Team id: " + body.data[0].team_id.id +"\n";
         replymsg = replymsg + "Story Points: " + body.data[0].story_points +"\n";
       };
       return res.reply(replymsg);
