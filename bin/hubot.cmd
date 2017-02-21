@@ -4,7 +4,7 @@ call npm install
 SETLOCAL
 SET PATH=node_modules\.bin;node_modules\hubot\node_modules\.bin;%PATH%
 
-SET HUBOT_AUTH_ADMIN="shell"
+SET HUBOT_AUTH_ADMIN=1
 
 SET AGM_clientId=api_client_example_1
 SET AGM_clientSecret=05example45g
