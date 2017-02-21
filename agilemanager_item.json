@@ -1,0 +1,54 @@
+{
+  "data": [
+    {
+      "type": "backlog_item",
+      "subtype": "user_story",
+      "story_priority": null,
+      "user_01_s": null,
+      "num_of_tasks": null,
+      "user_04": null,
+      "cover_status": "Not Covered",
+      "release_id": null,
+      "user_03": null,
+      "user_03_s": null,
+      "id": 6643, // This is the ID that the API uses to refrence this item through APi calls.
+      "kanban_status_id": null,
+      "author": "api_client_983363004_9",
+      "rank": 5147000,
+      "remaining": null,
+      "estimated": null,
+      "description": null,
+      "name": "Sketch Comments System",
+      "dev_comments": null,
+      "blocked": null,
+      "kan_status_duration": 0,
+      "application_id": {
+        "id": 53,
+        "type": "application"
+      },
+      "passed_acceptance_tests": 0,
+      "item_id": 6697, //This is the ID that will show up in the interactive web client. Users would see this ID as the item.
+      "kanban_parent_status_id": null,
+      "status": "New",
+      "story_points": null,
+      "sprint_id": null,
+      "pending_acceptance_tests": 0,
+      "creation_date": "2017-02-17",
+      "kan_parent_duration": 0,
+      "failed_acceptance_tests": 0,
+      "last_modified": "2017-02-17T16:26:09Z",
+      "team_id": {
+        "id": 159,
+        "type": "team"
+      },
+      "theme_id": null,
+      "invested": null,
+      "assigned_to": null,
+      "actual": null,
+      "user_02_s": null,
+      "archive_status": 0,
+      "feature_id": null
+    }
+  ],
+  "TotalResults": 1
+}
