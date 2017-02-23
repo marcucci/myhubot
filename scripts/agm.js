@@ -153,6 +153,25 @@ module.exports = function(robot) {
     });
   });
 
+  robot.respond(/agm delete #?([0-9]+)/i, function(res) {
+    var resourceOptions = {
+        workspaceId: workspaceId,
+        resource: 'backlog_items',
+        entityId: res.match[1],
+        method: 'DELETE'
+    };
+
+    agm.resource(resourceOptions, function(err, body) {
+      if (err) {
+        console.log('Error on delete');
+        replymsg = "There was an error on deletion\n";
+      } else {
+        replymsg = "Item deleted.\n";
+      };
+      return res.reply(replymsg);
+    });
+  });
+
   robot.respond(/agm test create/i, function(res) {
     var resourceOptions = {
         workspaceId: workspaceId,
