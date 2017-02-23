@@ -1,8 +1,7 @@
 const github      = require('githubot')
 const _           = require('lodash');
-const issuesUrl   = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100000";
-const commentsUrl = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100000";
-const putUrl      = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100000";
+const issuesUrl   = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100";
+const commentsUrl = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100";
 
 module.exports = (robot) => {
   robot.respond(/link issues/i, (res) => {
@@ -37,6 +36,22 @@ module.exports = (robot) => {
         resolve(linkedIssues);
       });
     });
+
+    // let checkPagination = new Promise((resolve, reject) => {
+    //     let page = 1
+    //
+    //     github.get(`${issuesUrl}&page=${page}`, (arr) => {
+    //
+    //       issues.map(issue => {
+    //         buildIssueObject(issue);
+    //         allIssueIds.push(issue.number);
+    //       })
+    //       allIssues.objects = allIssueObjects;
+    //       allIssues.ids = allIssueIds;
+    //       // need if else for success/fail
+    //       resolve(allIssues);
+    //     });
+    // })
 
     let findAllIssues = new Promise((resolve, reject) => {
       github.get(issuesUrl, (issues) => {
@@ -74,8 +89,8 @@ module.exports = (robot) => {
       //   let match = matchIssueObject(num, allIssueObjects);
       //   createItemThenComment(match);
       // });
-       let match = matchIssueObject(23, allIssueObjects);
-       testPromiseChain(match);
+      //  let match = matchIssueObject(32, allIssueObjects);
+      //  testPromiseChain(match);
     }
 
     function testPromiseChain(match) {
@@ -111,13 +126,14 @@ module.exports = (robot) => {
       function postGithubComment(data) {
         console.log(data[3]);
         let comment = {"body": `Linked to Agile Manager ID #${data[0]} (API ID #${data[1]})`}
+        let commentSuccess = "Github Comment Created"
 
         let postComment = new Promise((resolve, reject) => {
-          github.post (data[2], comment, function(err, reply) {
+          github.post (`${data[2]}/comments`, comment, function(err, reply) {
             if (err) {
               reject(err);
             } else {
-              resolve(JSON.stringify(reply));
+              resolve(commentSuccess);
             }
           });
         });
@@ -158,7 +174,7 @@ module.exports = (robot) => {
     p1.then(values => {
       return _.difference(values[0].ids, values[1]);
     }).then(data => {
-      res.reply(createAgmItems(data));
+      // res.reply(createAgmItems(data));
     }).catch(err => {
       res.reply(err);
     })
