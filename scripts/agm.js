@@ -29,6 +29,10 @@ module.exports = function(robot) {
   });
 
   robot.respond(/agm test/i, function(res) {
+    if (!robot.auth.hasRole(res.envelope.user,'trusted')) {
+      return res.reply ("You are not authorized to make this request.")
+    };
+
     var queryOptions;
     queryOptions = {
       workspaceId: workspaceId,
@@ -56,7 +60,7 @@ module.exports = function(robot) {
       workspaceId: workspaceId,
       resource: 'backlog_items',
       query: 'id=' + res.match[1],
-      fields: 'id,name',
+      fields: 'id,name,item_id,name,status,author,creation_date,last_modified,subtype',
       orderBy: 'name',
       limit: 1,
       offset: 0
@@ -71,10 +75,14 @@ module.exports = function(robot) {
         } else {
           replymsg = "Here's what I found.\n";
           replymsg = replymsg + "-------------------------\n";
-          replymsg = replymsg + "Item id: " + body.data[0].id +"\n";
+          replymsg = replymsg + "API id: " + body.data[0].id +"\n";
+          replymsg = replymsg + "Item id: " + body.data[0].item_id +"\n";
           replymsg = replymsg + "Subtype: " + body.data[0].subtype +"\n";
           replymsg = replymsg + "Name: " + body.data[0].name +"\n";
           replymsg = replymsg + "Status: " + body.data[0].status +"\n";
+          replymsg = replymsg + "Author: " + body.data[0].author +"\n";
+          replymsg = replymsg + "Created: " + body.data[0].creation_date +"\n";
+          replymsg = replymsg + "Modified: " + body.data[0].last_modified +"\n";
           return res.reply (replymsg);
         };
       };
