@@ -8,6 +8,7 @@
 //  agm test create - create a single use story as a test
 
 var workspaceId = '1003';
+const agmStandardFields = 'id,name,item_id,status,author,creation_date,last_modified,subtype';
 
 module.exports = function(robot) {
 
@@ -38,7 +39,7 @@ module.exports = function(robot) {
       workspaceId: workspaceId,
       resource: 'backlog_items',
       query: 'id>1',
-      fields: 'id,name',
+      fields: agmStandardFields,
       orderBy: 'name',
       limit: 1,
       offset: 0
@@ -60,7 +61,7 @@ module.exports = function(robot) {
       workspaceId: workspaceId,
       resource: 'backlog_items',
       query: 'id=' + res.match[1],
-      fields: 'id,name,item_id,name,status,author,creation_date,last_modified,subtype',
+      fields: agmStandardFields,
       orderBy: 'name',
       limit: 1,
       offset: 0
@@ -83,6 +84,41 @@ module.exports = function(robot) {
           replymsg = replymsg + "Author: " + body.data[0].author +"\n";
           replymsg = replymsg + "Created: " + body.data[0].creation_date +"\n";
           replymsg = replymsg + "Modified: " + body.data[0].last_modified +"\n";
+          return res.reply (replymsg);
+        };
+      };
+    });
+  });
+
+  robot.respond(/show agm created items/i, function(res) {
+    var queryOptions;
+    queryOptions = {
+      workspaceId: workspaceId,
+      resource: 'backlog_items',
+      query: 'author=\'' + process.env.AGM_clientId + '\'',
+      fields: agmStandardFields,
+      orderBy: 'id',
+      limit: 1000,
+      offset: 0
+    };
+
+    agm.query(queryOptions, function(err, body) {
+      if (err) {
+        console.error (JSON.stringify(err));
+        console.error (JSON.stringify(queryOptions));
+        res.reply ("There was an error with the query.")
+      } else {
+        if (body.TotalResults == 0) {
+          return res.reply ("No items found.\n");
+        } else {
+          replymsg = "Here's what I found.\n";
+          for (let each of body.data) {
+            replymsg = replymsg + "API id: " + each.id +"  ";
+            replymsg = replymsg + "  Item id: " + each.item_id +"\n";
+            replymsg = replymsg + "  Name: " + each.name +"\n";
+            replymsg = replymsg + "  Created: " + each.creation_date +"  ";
+            replymsg = replymsg + "  Modified: " + each.last_modified +"\n";
+          };
           return res.reply (replymsg);
         };
       };
