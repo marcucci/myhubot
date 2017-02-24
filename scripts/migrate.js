@@ -1,3 +1,6 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+
 const github      = require('githubot')
 const _           = require('lodash');
 const issuesUrl   = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100";
@@ -24,54 +27,67 @@ module.exports = (robot) => {
       };
     });
 
-    let findLinkedIssues = new Promise((resolve, reject) => {
-      github.get(commentsUrl, (comments) => {
-        for(comment of comments) {
-          if (comment.body.includes("Linked to Agile Manager ID #")) {
-            let id = comment.issue_url.split('/issues/');
-            linkedIssues.push(parseInt(id[1]));
-          }
-        }
-        // need if else for success/fail
-        resolve(linkedIssues);
+    // get page count for github issues api call, create a promise
+    // for each page, iterate over resulting arrays and build issue
+    // object as well as issue id arrays
+    function findAllIssues() {
+      let getPageCount = new Promise((resolve, reject) => {
+        github.get(`${issuesUrl}&page=1`, (issues) => {
+          let pageCount = Math.ceil(issues[0].number / 100);
+          // need if else for success/fail
+          resolve(pageCount);
+        });
       });
-    });
 
-    // let checkPagination = new Promise((resolve, reject) => {
-    //     let page = 1
-    //
-    //     github.get(`${issuesUrl}&page=${page}`, (arr) => {
-    //
-    //       issues.map(issue => {
-    //         buildIssueObject(issue);
-    //         allIssueIds.push(issue.number);
-    //       })
-    //       allIssues.objects = allIssueObjects;
-    //       allIssues.ids = allIssueIds;
-    //       // need if else for success/fail
-    //       resolve(allIssues);
-    //     });
-    // })
+      function formatIssues(num) {
+        let promises = [];
+        while (num > 0) {
+          promises.push(get100Issues(num));
+          num -= 1;
+        }
 
-    let findAllIssues = new Promise((resolve, reject) => {
-      github.get(issuesUrl, (issues) => {
-        issues.map(issue => {
-          buildIssueObject(issue);
-          allIssueIds.push(issue.number);
+        Promise.all(promises).then(data => {
+          buildIssueObjects(data);
+        }).catch(err => {
+          res.reply(err);
+        })
+      }
+
+      function get100Issues(num) {
+        return new Promise((resolve, reject) => {
+          github.get(`${issuesUrl}&page=${num}`, (issues) => {
+            // need if else for success/fail
+            resolve(issues);
+          });
+        });
+      }
+
+      function buildIssueObjects(arr) {
+        arr.map(issues => {
+          issues.map(issue => {
+            buildIssueObject(issue);
+            allIssueIds.push(issue.number);
+          })
         })
         allIssues.objects = allIssueObjects;
         allIssues.ids = allIssueIds;
-        // need if else for success/fail
-        resolve(allIssues);
-      });
-    });
+      }
+
+      getPageCount.then(num => {
+        formatIssues(num);
+      }).catch(err => {
+        res.reply(err);
+      })
+    }
 
     function buildIssueObject(array) {
       let issueObject = {};
       issueObject.number = array.number;
       issueObject.title = array.title;
       issueObject.url = array.url;
-      issueObject.storyPoints = findStoryPoints(array.labels)
+      issueObject.storyPoints = findStoryPoints(array.labels);
+      issueObject.state = array.state;
+      issueObject.priority = findPriority(array.labels);
       allIssueObjects.push(issueObject);
     }
 
@@ -82,6 +98,68 @@ module.exports = (robot) => {
         }
       }
       return null;
+    }
+
+    function findPriority(labels) {
+      for(label of labels) {
+        if (label.name.includes("priority")) {
+          switch (label.name) {
+            case 'high priority':
+              return '1-High';
+              break;
+            case 'medium priority':
+              return '2-Medium';
+              break;
+            case 'low priority':
+              return '3-Low'
+              break;
+          }
+        }
+      }
+      return null;
+    }
+
+    function findLinkedIssues() {
+      let getPageCount = fetch(`${commentsUrl}&page=1`).then(res => {
+        let url = res.headers.get('Link').split(" ")[2];
+        return url.split("&page=")[1].charAt(0);
+      }).catch(err => {
+        res.reply(err);
+      });
+
+      function scanAllComments(num) {
+        let promises = [];
+        while (num > 0) {
+          promises.push(scan100Comments(num));
+          num -= 1;
+        }
+        Promise.all(promises).then(data => {
+          console.log(linkedIssues);
+        }).catch(err => {
+          res.reply(err);
+        })
+      }
+
+      function scan100Comments(num) {
+        return new Promise((resolve, reject) => {
+          github.get(`${commentsUrl}&page=${num}`, (comments) => {
+            for(comment of comments) {
+              if (comment.body.includes("Linked to Agile Manager ID #")) {
+                let id = comment.issue_url.split('/issues/');
+                linkedIssues.push(parseInt(id[1]));
+              }
+            }
+            // need if else for success/fail
+            resolve(linkedIssues);
+          });
+        });
+      }
+
+      getPageCount.then(data => {
+        scanAllComments(data);
+      }).catch(err => {
+        res.reply(err);
+      })
     }
 
     function createAgmItems(unlinkedIssues){
@@ -100,16 +178,6 @@ module.exports = (robot) => {
           if (err) {
             reject(err);
           } else {
-            // replymsg = `Item created. Details follow:
-            // -------------------------
-            // API id: ${body.data[0].id}
-            // Item id: ${body.data[0].item_id}
-            // Subtype: ${body.data[0].subtype}
-            // Name: ${body.data[0].name}
-            // Status: ${body.data[0].status}
-            // Team id: ${body.data[0].team_id.id}
-            // Story Points: ${body.data[0].story_points}`
-
             // agmDetails - Item id, API id, Url, Terminal Message
             let agmDetails = [
               body.data[0].item_id,
@@ -164,19 +232,34 @@ module.exports = (robot) => {
               story_points: obj.story_points,
               application_id: '53',
               team_id: '159',
-              status: 'New' //New, In Progress, In Testing, or Done
+              theme_id: '6209',
+              story_priority: obj.priority,
+              status: convertState(obj.state) //New, In Progress, In Testing, or Done
           }]
       };
     }
 
-    let p1 = Promise.all([findAllIssues, findLinkedIssues]);
+    function convertState(state) {
+      if (state === 'closed') {
+        return 'Done';
+      } else {
+        return 'New';
+      }
+    }
 
-    p1.then(values => {
-      return _.difference(values[0].ids, values[1]);
-    }).then(data => {
-      // res.reply(createAgmItems(data));
-    }).catch(err => {
-      res.reply(err);
-    })
+    // findAllIssues();
+    // findLinkedIssues();
+    // let unlinkedIssues = _.difference(allIssueIds, linkedIssues);
+    // console.log(unlinkedIssues);
+
+    // let p1 = Promise.all([findAllIssues, findLinkedIssues]);
+    //
+    // p1.then(values => {
+    //   return _.difference(values[0].ids, values[1]);
+    // }).then(data => {
+    //   // res.reply(createAgmItems(data));
+    // }).catch(err => {
+    //   res.reply(err);
+    // })
   });
 };
