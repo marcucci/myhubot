@@ -137,18 +137,27 @@ module.exports = (robot) => {
       issueObject.title = array.title;
       issueObject.url = array.url;
       issueObject.storyPoints = findStoryPoints(array.labels);
-      issueObject.state = array.state;
+      issueObject.state = convertState(array.state);
       issueObject.priority = findPriority(array.labels);
       allIssueObjects.push(issueObject);
     }
 
     function findStoryPoints(labels) {
-      for(label of labels) {
-        if (label.name.includes("story points")) {
-          return label.name.split(": ")[1]; //string
+      // for(label of labels) {
+      //   if (label.name.includes("story points")) {
+      //     return label.name.split(": ")[1]; //string
+      //   }
+      // }
+      // return null;
+      if (labels.length === 0) {
+        return null;
+      } else {
+        for(label of labels) {
+          if (label.name.includes("story points")) {
+            return label.name.split(": ")[1]; //string
+          }
         }
       }
-      return null;
     }
 
     function findPriority(labels) {
@@ -218,17 +227,17 @@ module.exports = (robot) => {
         if (num < 3) {
           let match = matchIssueObject(num, allIssueObjects);
           agmPromises.push(createAgmItem(match));
+          // agmPromises.push(match);
         }
       });
       return agmPromises;
     }
 
     function createAgmItem(match) {
+      let resourceOptions = createResourceOptions(match);
       return new Promise((resolve, reject) => {
-        let resourceOptions = createResourceOptions(match);
         agm.resource(resourceOptions, function(err, body) {
           if (err) {
-            console.log(err);
             reject(err);
           } else {
             // agmDetails - Item id, API id, Url, Terminal Message
@@ -305,12 +314,12 @@ module.exports = (robot) => {
           data: [{
               name: obj.title,
               subtype: 'user_story',
-              story_points: obj.story_points,
+              story_points: obj.storyPoints,
               application_id: '53',
               team_id: '159',
               theme_id: '6209',
               story_priority: obj.priority,
-              status: convertState(obj.state) //New, In Progress, In Testing, or Done
+              status: obj.state //New, In Progress, In Testing, or Done
           }]
       };
     }
@@ -347,14 +356,6 @@ module.exports = (robot) => {
       res.reply(err);
     })
 
-    // let p1 = Promise.all([findAllIssues, findLinkedIssues]);
-    //
-    // p1.then(values => {
-    //   return _.difference(values[0].ids, values[1]);
-    // }).then(data => {
-    //   // res.reply(createAgmItems(data));
-    // }).catch(err => {
-    //   res.reply(err);
-    // })
+
   });
 };
