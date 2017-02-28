@@ -22,6 +22,7 @@
     "hubot-shipit": "^0.2.0",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
+    "q": "^1.4.1",
     "yo": "^1.8.5"
   },
   "engines": {
