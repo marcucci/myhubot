@@ -9,12 +9,10 @@ const commentsUrl = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/E
 
 module.exports = (robot) => {
   robot.respond(/link issues/i, (res) => {
-    //  #?([0-9]+)
     const AGM            = require('agilemanager-api');
     let linkedIssues     = [];
     let allIssueIds      = [];
     let allIssueObjects  = [];
-    // let allIssues        = {};
     let issuesPromises   = [];
     let commentsPromises = [];
     let AGM_options      = {
@@ -60,15 +58,14 @@ module.exports = (robot) => {
 
     function buildIssueObjects(arr) {
       arr.map(issues => {
+        //issues = array of objects
+        //filter out pull requests and invalid issues
         let filtered = _.filter(issues, function(i) { return !i.hasOwnProperty('pull_request') && isValid(i.labels) });
-        //array of objects
         filtered.map(issue => {
           buildIssueObject(issue);
           allIssueIds.push(issue.number);
         })
       })
-      // allIssues.objects = allIssueObjects;
-      // allIssues.ids = allIssueIds;
     }
 
     function isValid(labels) {
@@ -99,10 +96,18 @@ module.exports = (robot) => {
       } else {
         for(label of labels) {
           if (label.name.includes("story points")) {
-            return label.name.split(": ")[1]; //string
+            return label.name.split(": ")[1];
           }
         }
         return null;
+      }
+    }
+
+    function convertState(state) {
+      if (state === 'closed') {
+        return 'Done';
+      } else {
+        return 'New';
       }
     }
 
@@ -125,6 +130,10 @@ module.exports = (robot) => {
       return null;
     }
 
+    //get page count of all issues' comments, max 100 comments per page.
+    //github api includes "Link" in header which specifies last page #.
+    //Link does not appear if results fit on single page, so this
+    //function will need to be edited to account for single page.
     let commentsPageCount = fetch(`${commentsUrl}&page=1`).then(res => {
       let url = res.headers.get('Link').split(" ")[2];
       return url.split("&page=")[1].charAt(0);
@@ -132,6 +141,7 @@ module.exports = (robot) => {
       res.reply(err);
     });
 
+    //use page count to build array of 'scanComments' promises
     function buildCommentsPromises(num) {
       while (num > 0) {
         commentsPromises.push(scan100Comments(num));
@@ -163,7 +173,6 @@ module.exports = (robot) => {
           if (err) {
             reject(err);
           } else {
-            // agmDetails - Item id, API id, Url, Terminal Message
             let agmDetails = [
               body.data[0].item_id,
               body.data[0].id,
@@ -176,49 +185,6 @@ module.exports = (robot) => {
           };
         });
       });
-    }
-
-    function postGithubComment(data) {
-      let comment = {"body": `Linked to Agile Manager ID #${data[0]} (API ID #${data[1]})`}
-      let commentSuccess = `Github Issue #${data[4]} Comment Created`
-
-      return new Promise((resolve, reject) => {
-        github.post (`${data[2]}/comments`, comment, function(err, reply) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(commentSuccess);
-          }
-        });
-      });
-    }
-
-    function createAgmItems(unlinkedIssues){
-      // console.log(res.match[1]);
-      if (unlinkedIssues.length === 0) {
-        res.reply('All Issues Linked.')
-      } else {
-        return q.all(unlinkedIssues.map(i => {
-          let match = matchIssueObject(i, allIssueObjects);
-          return createAgmItem(match);
-        })).then(result => {
-          result.forEach(arr => {
-            console.log(arr[3]);
-          })
-          return q.all(result.map(i => {
-            return postGithubComment(i);
-          }));
-        }).then(result => {
-          console.log(result[0]);
-        })
-      }
-    }
-
-    function matchIssueObject(num, issues){
-      let match = issues.filter(function(obj) {
-        return obj.number == num;
-      });
-      return match[0];
     }
 
     function createResourceOptions(obj){
@@ -239,12 +205,49 @@ module.exports = (robot) => {
       };
     }
 
-    function convertState(state) {
-      if (state === 'closed') {
-        return 'Done';
+    //if no unlinked issues, return msg. Otherwise continue
+    //promise chain, creating agm user stories and posting github comments
+    //containing agm info
+    function createAgmItems(unlinkedIssues){
+      if (unlinkedIssues.length === 0) {
+        res.reply('All Issues Linked.')
       } else {
-        return 'New';
+        return q.all(unlinkedIssues.map(i => {
+          let match = matchIssueObject(i, allIssueObjects);
+          return createAgmItem(match);
+        })).then(result => {
+          result.forEach(arr => {
+            console.log(arr[3]);
+          })
+          return q.all(result.map(i => {
+            return postGithubComment(i);
+          }))
+        }).then(result => {
+          console.log(result);
+        })
       }
+    }
+
+    function matchIssueObject(num, issues){
+      let match = issues.filter(function(obj) {
+        return obj.number == num;
+      });
+      return match[0];
+    }
+
+    function postGithubComment(data) {
+      let comment = {"body": `Linked to Agile Manager ID #${data[0]} (API ID #${data[1]})`}
+      let commentSuccess = `Github Issue #${data[4]} Comment Created`
+
+      return new Promise((resolve, reject) => {
+        github.post (`${data[2]}/comments`, comment, function(err, reply) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(commentSuccess);
+          }
+        });
+      });
     }
 
     issuesPageCount.then(num => {
@@ -264,7 +267,7 @@ module.exports = (robot) => {
     }).then(unlinkedIssues => {
       return createAgmItems(unlinkedIssues);
     }).catch(err => {
-      res.reply(err);
+      console.error(err);
     })
 
   });
