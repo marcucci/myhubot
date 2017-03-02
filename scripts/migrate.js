@@ -1,27 +1,27 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-const github = require('githubot')
+const GITHUB = require('githubot')
 const _      = require('lodash');
-const q      = require('q');
+const Q      = require('q');
 
 module.exports = (robot) => {
-  const AGM       = require('agilemanager-api');
-  let AGM_options = {
-    clientId: process.env.AGM_clientId,
-    clientSecret: process.env.AGM_clientSecret,
-    apiURL: process.env.AGM_apiUrl
-  };
-  let agm         = new AGM(AGM_options);
-
-  agm.login(function (err, body) {
-    if (err) {
-      console.log('error on login');
-      console.log(JSON.stringify(err));
-    };
-  });
-
   robot.respond(/link issues/i, (res) => {
+    const AGM       = require('agilemanager-api');
+    let AGM_options = {
+      clientId: process.env.AGM_clientId,
+      clientSecret: process.env.AGM_clientSecret,
+      apiURL: process.env.AGM_apiUrl
+    };
+    let agm         = new AGM(AGM_options);
+
+    agm.login(function (err, body) {
+      if (err) {
+        console.log('error on login');
+        console.log(JSON.stringify(err));
+      };
+    });
+
     let issuesUrl        = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100";
     let commentsUrl      = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100";
     let linkedIssues     = [];
@@ -32,7 +32,7 @@ module.exports = (robot) => {
 
     //get page count of github issues (max 100 issues per page)
     let issuesPageCount = new Promise((resolve, reject) => {
-      github.get(`${issuesUrl}&page=1`, (issues) => {
+      GITHUB.get(`${issuesUrl}&page=1`, (issues) => {
         let pageCount = Math.ceil(issues[0].number / 100);
         // need if else for success/fail
         resolve(pageCount);
@@ -50,7 +50,7 @@ module.exports = (robot) => {
 
     function get100Issues(num) {
       return new Promise((resolve, reject) => {
-        github.get(`${issuesUrl}&page=${num}`, (issues) => {
+        GITHUB.get(`${issuesUrl}&page=${num}`, (issues) => {
           // need if else for success/fail
           resolve(issues);
         });
@@ -151,7 +151,7 @@ module.exports = (robot) => {
 
     function scan100Comments(num) {
       return new Promise((resolve, reject) => {
-        github.get(`${commentsUrl}&page=${num}`, (comments) => {
+        GITHUB.get(`${commentsUrl}&page=${num}`, (comments) => {
           for(comment of comments) {
             if (comment.body.includes("Linked to Agile Manager ID #")) {
               let id = comment.issue_url.split('/issues/');
@@ -176,7 +176,7 @@ module.exports = (robot) => {
               body.data[0].item_id,
               body.data[0].id,
               match.url,
-              `Item Created. AGM Client ID: ${body.data[0].item_id}. Github Issue: ${match.number}`,
+              `Item Created. AGM Client ID: ${body.data[0].item_id}; API ID: ${body.data[0].id}. Github Issue: ${match.number}`,
               match.number
             ]
 
@@ -211,18 +211,20 @@ module.exports = (robot) => {
       if (unlinkedIssues.length === 0) {
         res.reply('All Issues Linked.')
       } else {
-        return q.all(unlinkedIssues.map(i => {
+        return Q.all(unlinkedIssues.map(i => {
           let match = matchIssueObject(i, allIssueObjects);
           return createAgmItem(match);
         })).then(result => {
           result.forEach(arr => {
             console.log(arr[3]);
           })
-          return q.all(result.map(i => {
+          return Q.all(result.map(i => {
             return postGithubComment(i);
           }))
         }).then(result => {
-          res.reply(result);
+          result.forEach(msg => {
+            console.log(msg);
+          })
         })
       }
     }
@@ -239,14 +241,9 @@ module.exports = (robot) => {
       // let commentSuccess = `Github Issue #${data[4]} Comment Created`
 
       return new Promise((resolve, reject) => {
-        github.post (`${data[2]}/comments`, comment, function(err, reply) {
-          if (err) {
-            console.error('inside github' + err);
-            reject(err);
-          } else {
-            let issue = reply.issue_url.split('issues/')
-            resolve(`Github Issue #${issue[1]} Comment Created`);
-          }
+        GITHUB.post (`${data[2]}/comments`, comment, reply => {
+          let issue = reply.issue_url.split('issues/')
+          resolve(`Github Issue #${issue[1]} Comment Created`);
         });
       });
     }
