@@ -268,4 +268,108 @@ module.exports = (robot) => {
       console.error(err);
     })
   });
+
+  robot.respond(/update issue #?([0-9]+)/i, (res) => {
+    //user enters github issue number in command
+    const AGM       = require('agilemanager-api');
+    let AGM_options = {
+      clientId: process.env.AGM_clientId,
+      clientSecret: process.env.AGM_clientSecret,
+      apiURL: process.env.AGM_apiUrl
+    };
+    let agm         = new AGM(AGM_options);
+
+    agm.login(function (err, body) {
+      if (err) {
+        console.log('error on login');
+        console.log(JSON.stringify(err));
+      };
+    });
+
+    let id       = res.match[1];
+    let issueUrl = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${id}`;
+
+    function getIssue(id) {
+      return new Promise((resolve, reject) => {
+        GITHUB.get(`${issueUrl}`, (issue) => {
+          // need if else for success/fail
+          resolve(issue);
+        });
+      });
+    }
+
+    // function getIssueComments() {
+    //   return new Promise((resolve, reject) => {
+    //     GITHUB.get(`${issueUrl}/comments`, (comments) => {
+    //       // need if else for success/fail
+    //       resolve(comments);
+    //     });
+    //   });
+    // }
+
+    let getIssueComments = new Promise(function(resolve, reject) {
+      GITHUB.get(`${issueUrl}/comments`, (comments) => {
+        // need if else for success/fail
+        resolve(comments);
+      });
+    });
+
+    function getAgmId(comments) {
+      for (c of comments) {
+        if (c.body.includes('Linked to Agile Manager')) {
+          return c.body.split('API ID #')[1].slice(0, -1);
+        }
+      }
+    }
+
+    function updateAgmItem(id) {
+      let resourceOptions = createResourceOptions(id);
+
+      return new Promise((resolve, reject) => {
+        agm.resource(resourceOptions, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            let agmDetails = [
+              body.data[0].item_id,
+              body.data[0].id,
+              match.url,
+              `Item Created. AGM Client ID: ${body.data[0].item_id}; API ID: ${body.data[0].id}. Github Issue: ${match.number}`,
+              match.number
+            ]
+
+            resolve(agmDetails);
+          };
+        });
+      });
+    }
+
+    function createResourceOptions(obj){
+      return {
+          workspaceId: '1003',
+          resource: 'backlog_items',
+          method: 'PUT',
+          data: [{
+              name: obj.title,
+              subtype: 'user_story',
+              story_points: obj.storyPoints,
+              application_id: '53',
+              team_id: '159',
+              // theme_id: '6209',
+              story_priority: obj.priority,
+              status: obj.state //New, In Progress, In Testing, or Done
+          }]
+      };
+    }
+
+    getIssueComments.then(data => {
+      return getAgmId(data);
+    }).then(result => {
+      res.reply(result);
+    }).catch(err => {
+      res.reply(err)
+    })
+
+
+  });
 };
