@@ -6,7 +6,7 @@ const _      = require('lodash');
 const Q      = require('q');
 
 module.exports = (robot) => {
-  robot.respond(/link issues/i, (res) => {
+  robot.respond(/link issues/i, res => {
     const AGM       = require('agilemanager-api');
     let AGM_options = {
       clientId: process.env.AGM_clientId,
@@ -32,7 +32,7 @@ module.exports = (robot) => {
 
     //get page count of github issues (max 100 issues per page)
     let issuesPageCount = new Promise((resolve, reject) => {
-      GITHUB.get(`${issuesUrl}&page=1`, (issues) => {
+      GITHUB.get(`${issuesUrl}&page=1`, issues => {
         let pageCount = Math.ceil(issues[0].number / 100);
         // need if else for success/fail
         resolve(pageCount);
@@ -50,7 +50,7 @@ module.exports = (robot) => {
 
     function get100Issues(num) {
       return new Promise((resolve, reject) => {
-        GITHUB.get(`${issuesUrl}&page=${num}`, (issues) => {
+        GITHUB.get(`${issuesUrl}&page=${num}`, issues => {
           // need if else for success/fail
           resolve(issues);
         });
@@ -151,7 +151,7 @@ module.exports = (robot) => {
 
     function scan100Comments(num) {
       return new Promise((resolve, reject) => {
-        GITHUB.get(`${commentsUrl}&page=${num}`, (comments) => {
+        GITHUB.get(`${commentsUrl}&page=${num}`, comments => {
           for(comment of comments) {
             if (comment.body.includes("Linked to Agile Manager ID #")) {
               let id = comment.issue_url.split('/issues/');
@@ -269,7 +269,7 @@ module.exports = (robot) => {
     })
   });
 
-  robot.respond(/update issue #?([0-9]+)/i, (res) => {
+  robot.respond(/update issue #?([0-9]+)/i, res => {
     //user enters github issue number in command
     const AGM       = require('agilemanager-api');
     let AGM_options = {
@@ -289,30 +289,21 @@ module.exports = (robot) => {
     let id       = res.match[1];
     let issueUrl = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${id}`;
 
+    let getIssueComments = new Promise(function(resolve, reject) {
+      GITHUB.get(`${issueUrl}/comments`, comments => {
+        // need if else for success/fail
+        resolve(comments);
+      });
+    });
+
     function getIssue(id) {
       return new Promise((resolve, reject) => {
-        GITHUB.get(`${issueUrl}`, (issue) => {
+        GITHUB.get(issueUrl, issue => {
           // need if else for success/fail
           resolve(issue);
         });
       });
     }
-
-    // function getIssueComments() {
-    //   return new Promise((resolve, reject) => {
-    //     GITHUB.get(`${issueUrl}/comments`, (comments) => {
-    //       // need if else for success/fail
-    //       resolve(comments);
-    //     });
-    //   });
-    // }
-
-    let getIssueComments = new Promise(function(resolve, reject) {
-      GITHUB.get(`${issueUrl}/comments`, (comments) => {
-        // need if else for success/fail
-        resolve(comments);
-      });
-    });
 
     function getAgmId(comments) {
       for (c of comments) {

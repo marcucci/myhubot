@@ -1,0 +1,555 @@
+//original features with wrong theme ids
+
+{
+    "data":[
+        {
+            "name":"Single Sign On",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"Marketplace Compliance Toolkit Access",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"Basic RBAC Support",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"Personalization",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"QlikView/QlikSense Report Integration",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"User data upload to Vertica",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"User data upload to Hadoop",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"User data download- Data Extract Capability",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"Receive Notifications for data upload/extract completion",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+{
+    "data":[
+        {
+            "name":"Chat with an agent",
+            "theme_id": "6209",
+            "application_id": "53",
+            "team_id": "159"
+        }
+    ]
+}
+
+
+//full json from api for original features with wrong theme ids
+
+
+{
+  "data": [
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6763,
+      "author": "api_client_983363004_9",
+      "rank": 5162000,
+      "description": null,
+      "priority": null,
+      "name": "Single Sign On",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:48:19Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6769,
+      "author": "api_client_983363004_9",
+      "rank": 5163000,
+      "description": null,
+      "priority": null,
+      "name": "Marketplace Compliance Toolkit Access",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:55:09Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6770,
+      "author": "api_client_983363004_9",
+      "rank": 5164000,
+      "description": null,
+      "priority": null,
+      "name": "Basic RBAC Support",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:55:49Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6771,
+      "author": "api_client_983363004_9",
+      "rank": 5165000,
+      "description": null,
+      "priority": null,
+      "name": "Personalization",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:00Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6773,
+      "author": "api_client_983363004_9",
+      "rank": 5166000,
+      "description": null,
+      "priority": null,
+      "name": "QlikView/QlikSense Report Integration",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:10Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6774,
+      "author": "api_client_983363004_9",
+      "rank": 5167000,
+      "description": null,
+      "priority": null,
+      "name": "User data upload to Vertica",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:18Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6775,
+      "author": "api_client_983363004_9",
+      "rank": 5168000,
+      "description": null,
+      "priority": null,
+      "name": "User data upload to Hadoop",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:28Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6776,
+      "author": "api_client_983363004_9",
+      "rank": 5169000,
+      "description": null,
+      "priority": null,
+      "name": "User data download- Data Extract Capability",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:39Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6777,
+      "author": "api_client_983363004_9",
+      "rank": 5170000,
+      "description": null,
+      "priority": null,
+      "name": "Chat with an agent",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:56:57Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    },
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 6778,
+      "author": "api_client_983363004_9",
+      "rank": 5171000,
+      "description": null,
+      "priority": null,
+      "name": "Receive Notifications for data upload/extract completion",
+      "initial_estimate": null,
+      "applications": {
+        "data": [
+          {
+            "id": 53,
+            "type": "application"
+          }
+        ],
+        "TotalResults": 1
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-02-28T18:58:04Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-02-28",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6209,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    }
+  ],
+  "TotalResults": 10
+}
+
+//new features labeled by release month
+
+{
+  "data": [
+    {
+      "type": "feature",
+      "release_id": null,
+      "wsjf_job_size": null,
+      "id": 7064,
+      "author": "api_client_983363004_9",
+      "rank": 9816000,
+      "description": null,
+      "priority": null,
+      "name": "Single Sign On-Feb",
+      "initial_estimate": null,
+      "applications": {
+        "data": [],
+        "TotalResults": 0
+      },
+      "wsjf_risk": null,
+      "agg_story_points": 0,
+      "status_duration": 0,
+      "wsjf_cod": null,
+      "last_modified": "2017-03-03T20:11:55Z",
+      "status": "New",
+      "wsjf_time_effort": null,
+      "story_points": null,
+      "creation_date": "2017-03-03",
+      "wsjf": null,
+      "theme_id": {
+        "id": 6748,
+        "type": "theme"
+      },
+      "num_of_user_stories": 0,
+      "owner": null,
+      "num_of_defects": 0,
+      "feature_type": null,
+      "wsjf_user_impact": null
+    }
+  ],
+  "TotalResults": 1
+}

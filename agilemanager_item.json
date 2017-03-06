@@ -1,54 +1,56 @@
 {
-  "data": [
-    {
-      "type": "backlog_item",
-      "subtype": "user_story",
-      "story_priority": null,
-      "user_01_s": null,
-      "num_of_tasks": null,
-      "user_04": null,
-      "cover_status": "Not Covered",
-      "release_id": null,
-      "user_03": null,
-      "user_03_s": null,
-      "id": 6643, // This is the ID that the API uses to refrence this item through APi calls.
-      "kanban_status_id": null,
-      "author": "api_client_983363004_9",
-      "rank": 5147000,
-      "remaining": null,
-      "estimated": null,
-      "description": null,
-      "name": "Sketch Comments System",
-      "dev_comments": null,
-      "blocked": null,
-      "kan_status_duration": 0,
-      "application_id": {
-        "id": 53,
-        "type": "application"
-      },
-      "passed_acceptance_tests": 0,
-      "item_id": 6697, //This is the ID that will show up in the interactive web client. Users would see this ID as the item.
-      "kanban_parent_status_id": null,
-      "status": "New",
-      "story_points": null,
-      "sprint_id": null,
-      "pending_acceptance_tests": 0,
-      "creation_date": "2017-02-17",
-      "kan_parent_duration": 0,
-      "failed_acceptance_tests": 0,
-      "last_modified": "2017-02-17T16:26:09Z",
-      "team_id": {
-        "id": 159,
-        "type": "team"
-      },
-      "theme_id": null,
-      "invested": null,
-      "assigned_to": null,
-      "actual": null,
-      "user_02_s": null,
-      "archive_status": 0,
-      "feature_id": null
-    }
-  ],
-  "TotalResults": 1
+  "type": "backlog_item",
+  "subtype": "user_story",
+  "story_priority": "1-High",
+  "user_01_s": "HP",
+  "num_of_tasks": null,
+  "user_04": null,
+  "cover_status": "Not Covered",
+  "release_id": null,
+  "user_03": null,
+  "user_03_s": 271229,
+  "user_04_s": null,
+  "id": 6837,
+  "kanban_status_id": null,
+  "author": "api_client_983363004_9",
+  "rank": 5274000,
+  "remaining": null,
+  "estimated": null,
+  "description": null,
+  "name": "As a Developer, I want to create a Marketplace Item Card so that it can be show cased in the slider component.",
+  "dev_comments": null,
+  "blocked": null,
+  "kan_status_duration": 0,
+  "application_id": {
+    "id": 53,
+    "type": "application"
+  },
+  "passed_acceptance_tests": 0,
+  "item_id": 6894,
+  "kanban_parent_status_id": null,
+  "status": "Done",
+  "story_points": 13,
+  "sprint_id": null,
+  "pending_acceptance_tests": 0,
+  "creation_date": "2017-02-28",
+  "kan_parent_duration": 0,
+  "failed_acceptance_tests": 0,
+  "last_modified": "2017-03-03T22:02:47Z",
+  "team_id": {
+    "id": 159,
+    "type": "team"
+  },
+  "theme_id": {
+    "id": 6749,
+    "type": "theme"
+  },
+  "invested": null,
+  "assigned_to": null,
+  "actual": null,
+  "user_02_s": 100,
+  "archive_status": 0,
+  "feature_id": {
+    "id": 7065,
+    "type": "feature"
+  }
 }
