@@ -286,8 +286,10 @@ module.exports = (robot) => {
       };
     });
 
-    let id       = res.match[1];
-    let issueUrl = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${id}`;
+    let num         = res.match[1];
+    let issueUrl    = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${num}`;
+    let issueObject = {};
+    let apiId;
 
     let getIssueComments = new Promise(function(resolve, reject) {
       GITHUB.get(`${issueUrl}/comments`, comments => {
@@ -295,15 +297,6 @@ module.exports = (robot) => {
         resolve(comments);
       });
     });
-
-    function getIssue(id) {
-      return new Promise((resolve, reject) => {
-        GITHUB.get(issueUrl, issue => {
-          // need if else for success/fail
-          resolve(issue);
-        });
-      });
-    }
 
     function getAgmId(comments) {
       for (c of comments) {
@@ -313,52 +306,100 @@ module.exports = (robot) => {
       }
     }
 
-    function updateAgmItem(id) {
-      let resourceOptions = createResourceOptions(id);
+    function getIssue() {
+      return new Promise((resolve, reject) => {
+        GITHUB.get(issueUrl, issue => {
+          // need if else for success/fail
+          buildIssueObject(issue);
+          resolve(issueObject);
+        });
+      });
+    }
+
+    function buildIssueObject(i) {
+      issueObject.title = i.title;
+      issueObject.storyPoints = findStoryPoints(i.labels);
+      issueObject.state = convertState(i.state);
+      issueObject.priority = findPriority(i.labels);
+    }
+
+    function findStoryPoints(labels) {
+      if (labels.length > 0) {
+        for(label of labels) {
+          if (label.name.includes("story points")) {
+            return label.name.split(": ")[1];
+          }
+        }
+      }
+      return null;
+    }
+
+    function convertState(state) {
+      if (state === 'closed') {
+        return 'Done';
+      } else {
+        return 'New';
+      }
+    }
+
+    function findPriority(labels) {
+      for(label of labels) {
+        if (label.name.includes("priority")) {
+          switch (label.name) {
+            case 'high priority':
+              return '1-High';
+              break;
+            case 'medium priority':
+              return '2-Medium';
+              break;
+            case 'low priority':
+              return '3-Low'
+              break;
+          }
+        }
+      }
+      return null;
+    }
+
+    function updateAgmItem(id, obj) {
+      let resourceOptions = createResourceOptions(id, obj);
 
       return new Promise((resolve, reject) => {
         agm.resource(resourceOptions, function(err, body) {
           if (err) {
             reject(err);
           } else {
-            let agmDetails = [
-              body.data[0].item_id,
-              body.data[0].id,
-              match.url,
-              `Item Created. AGM Client ID: ${body.data[0].item_id}; API ID: ${body.data[0].id}. Github Issue: ${match.number}`,
-              match.number
-            ]
-
-            resolve(agmDetails);
+            resolve(`AGM Item #${apiId} Updated.`);
           };
         });
       });
     }
 
-    function createResourceOptions(obj){
+    function createResourceOptions(id, obj){
       return {
           workspaceId: '1003',
           resource: 'backlog_items',
+          entityId: id,
           method: 'PUT',
-          data: [{
+          data: {
               name: obj.title,
-              subtype: 'user_story',
               story_points: obj.storyPoints,
-              application_id: '53',
-              team_id: '159',
-              // theme_id: '6209',
               story_priority: obj.priority,
               status: obj.state //New, In Progress, In Testing, or Done
-          }]
+          }
       };
     }
 
     getIssueComments.then(data => {
-      return getAgmId(data);
-    }).then(result => {
-      res.reply(result);
+      apiId = getAgmId(data);
+    }).then(() => {
+      return getIssue();
+    }).then(obj => {
+      return updateAgmItem(apiId, obj);
+    }).then(msg => {
+      res.reply(msg);
     }).catch(err => {
-      res.reply(err)
+      res.reply(err);
     })
 
 
