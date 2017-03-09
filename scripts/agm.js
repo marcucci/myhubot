@@ -29,7 +29,7 @@ module.exports = function(robot) {
     };
   });
 
-  robot.respond(/agm test/i, function(res) {
+  robot.respond(/agm test connect/i, function(res) {
     if (!robot.auth.hasRole(res.envelope.user,'trusted')) {
       return res.reply ("You are not authorized to make this request.")
     };
