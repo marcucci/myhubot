@@ -6,6 +6,38 @@ const _      = require('lodash');
 const Q      = require('q');
 
 module.exports = (robot) => {
+  //convert github issue state to agm syntax
+  function convertState(state) {
+    return (state === 'closed' ? 'Done' : 'New');
+  }
+
+  //find github issue story points and return integer
+  function findStoryPoints(labels) {
+    let obj = _.find(labels, l => l.name.includes('story points'));
+
+    return (obj === undefined ? null : obj.name.split(': ')[1]);
+  }
+
+  //convert github issue priority to agm syntax
+  function findPriority(labels) {
+    for(label of labels) {
+      if (label.name.includes("priority")) {
+        switch (label.name) {
+          case 'high priority':
+            return '1-High';
+            break;
+          case 'medium priority':
+            return '2-Medium';
+            break;
+          case 'low priority':
+            return '3-Low'
+            break;
+        }
+      }
+    }
+    return null;
+  }
+
   robot.respond(/link issues/i, res => {
     const AGM       = require('agilemanager-api');
     let AGM_options = {
@@ -61,7 +93,7 @@ module.exports = (robot) => {
       arr.map(issues => {
         //issues = array of objects
         //filter out pull requests and invalid issues
-        let filtered = _.filter(issues, function(i) { return !i.hasOwnProperty('pull_request') && isValid(i.labels) });
+        let filtered = _.filter(issues, i => !i.hasOwnProperty('pull_request') && isValid(i.labels));
         filtered.map(issue => {
           buildIssueObject(issue);
           allIssueIds.push(issue.number);
@@ -70,14 +102,9 @@ module.exports = (robot) => {
     }
 
     function isValid(labels) {
-      if (labels.length > 0) {
-        for (label of labels) {
-          if (label.name.includes('invalid')) {
-            return false;
-          }
-        }
-      }
-      return true;
+      let obj = _.find(labels, l => l.name.includes('invalid'));
+
+      return (obj === undefined ? true : false);
     }
 
     function buildIssueObject(i) {
@@ -89,44 +116,6 @@ module.exports = (robot) => {
       issueObject.state = convertState(i.state);
       issueObject.priority = findPriority(i.labels);
       allIssueObjects.push(issueObject);
-    }
-
-    function findStoryPoints(labels) {
-      if (labels.length > 0) {
-        for(label of labels) {
-          if (label.name.includes("story points")) {
-            return label.name.split(": ")[1];
-          }
-        }
-      }
-      return null;
-    }
-
-    function convertState(state) {
-      if (state === 'closed') {
-        return 'Done';
-      } else {
-        return 'New';
-      }
-    }
-
-    function findPriority(labels) {
-      for(label of labels) {
-        if (label.name.includes("priority")) {
-          switch (label.name) {
-            case 'high priority':
-              return '1-High';
-              break;
-            case 'medium priority':
-              return '2-Medium';
-              break;
-            case 'low priority':
-              return '3-Low'
-              break;
-          }
-        }
-      }
-      return null;
     }
 
     //get page count of all issues' comments, max 100 comments per page.
@@ -427,14 +416,14 @@ module.exports = (robot) => {
     }
 
     function findFeatureId(i) {
-      let feature = _.find(i.labels, l => { return l.name.includes('Feature') });
+      let feature = _.find(i.labels, l => l.name.includes('Feature'));
 
       if (feature === undefined) {
         return null;
       }
 
       //find featureIds object via issue's feature name
-      let obj = _.find(featureIds, f => { return f.gh_label === feature.name })
+      let obj = _.find(featureIds, f => f.gh_label === feature.name)
 
       //if no assigned sprint, use 'no sprint' feature id
       if (i.milestone === null) {
@@ -444,44 +433,6 @@ module.exports = (robot) => {
       //use sprint # to find feature id
       let sprint = i.milestone.title.split('- ')[1];
       return obj[sprint];
-    }
-
-    function findStoryPoints(labels) {
-      if (labels.length > 0) {
-        for(label of labels) {
-          if (label.name.includes("story points")) {
-            return label.name.split(": ")[1];
-          }
-        }
-      }
-      return null;
-    }
-
-    function convertState(state) {
-      if (state === 'closed') {
-        return 'Done';
-      } else {
-        return 'New';
-      }
-    }
-
-    function findPriority(labels) {
-      for(label of labels) {
-        if (label.name.includes("priority")) {
-          switch (label.name) {
-            case 'high priority':
-              return '1-High';
-              break;
-            case 'medium priority':
-              return '2-Medium';
-              break;
-            case 'low priority':
-              return '3-Low'
-              break;
-          }
-        }
-      }
-      return null;
     }
 
     function updateAgmItem(id, obj) {
@@ -519,12 +470,22 @@ module.exports = (robot) => {
     }).then(() => {
       return getIssue();
     }).then(obj => {
-      return updateAgmItem(apiId, obj);
-    }).then(msg => {
-      res.reply(msg);
+      console.log(obj)
     }).catch(err => {
       res.reply(err);
     })
+
+    // getIssueComments.then(data => {
+    //   apiId = getAgmId(data);
+    // }).then(() => {
+    //   return getIssue();
+    // }).then(obj => {
+    //   return updateAgmItem(apiId, obj);
+    // }).then(msg => {
+    //   res.reply(msg);
+    // }).catch(err => {
+    //   res.reply(err);
+    // })
 
   });
 };
