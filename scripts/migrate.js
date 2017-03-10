@@ -1,9 +1,10 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-const GITHUB = require('githubot')
-const _      = require('lodash');
-const Q      = require('q');
+const GITHUB     = require('githubot')
+const _          = require('lodash');
+const Q          = require('q');
+const featureIds = require('../lib/featureIds');
 
 module.exports = (robot) => {
   //convert github issue state to agm syntax
@@ -279,108 +280,6 @@ module.exports = (robot) => {
     let issueUrl    = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${num}`;
     let issueObject = {};
     let apiId;
-    let featureIds = [
-      {
-        "gh_label"  : "Feature: Single Sign On",
-        "No Sprint" : "6763",
-        "Sprint 1"  : "7064",
-        "Sprint 2"  : "7064",
-        "Sprint 3"  : "7074",
-        "Sprint 4"  : "7074",
-        "Sprint 5"  : "7084",
-        "Sprint 6"  : "7084"
-      },
-      {
-        "gh_label"  : "Feature: Marketplace Compliance Toolkit Access",
-        "No Sprint" : "6769",
-        "Sprint 1"  : "7065",
-        "Sprint 2"  : "7065",
-        "Sprint 3"  : "7075",
-        "Sprint 4"  : "7075",
-        "Sprint 5"  : "7085",
-        "Sprint 6"  : "7085"
-      },
-      {
-        "gh_label"  : "Feature: Basic RBAC Support",
-        "No Sprint" : "6770",
-        "Sprint 1"  : "7066",
-        "Sprint 2"  : "7066",
-        "Sprint 3"  : "7076",
-        "Sprint 4"  : "7076",
-        "Sprint 5"  : "7086",
-        "Sprint 6"  : "7086"
-      },
-      {
-        "gh_label"  : "Feature: Personalization",
-        "No Sprint" : "6771",
-        "Sprint 1"  : "7067",
-        "Sprint 2"  : "7067",
-        "Sprint 3"  : "7077",
-        "Sprint 4"  : "7077",
-        "Sprint 5"  : "7087",
-        "Sprint 6"  : "7087"
-      },
-      {
-        "gh_label"  : "Feature: QlikView/QlikSense Report Integration",
-        "No Sprint" : "6773",
-        "Sprint 1"  : "7068",
-        "Sprint 2"  : "7068",
-        "Sprint 3"  : "7078",
-        "Sprint 4"  : "7078",
-        "Sprint 5"  : "7088",
-        "Sprint 6"  : "7088"
-      },
-      {
-        "gh_label"  : "Feature: User data upload to Vertica",
-        "No Sprint" : "6774",
-        "Sprint 1"  : "7069",
-        "Sprint 2"  : "7069",
-        "Sprint 3"  : "7079",
-        "Sprint 4"  : "7079",
-        "Sprint 5"  : "7089",
-        "Sprint 6"  : "7089"
-      },
-      {
-        "gh_label"  : "Feature: User data upload to Hadoop",
-        "No Sprint" : "6775",
-        "Sprint 1"  : "7070",
-        "Sprint 2"  : "7070",
-        "Sprint 3"  : "7080",
-        "Sprint 4"  : "7080",
-        "Sprint 5"  : "7090",
-        "Sprint 6"  : "7090"
-      },
-      {
-        "gh_label"  : "Feature: User data download- Data Extract Capability",
-        "No Sprint" : "6776",
-        "Sprint 1"  : "7071",
-        "Sprint 2"  : "7071",
-        "Sprint 3"  : "7081",
-        "Sprint 4"  : "7081",
-        "Sprint 5"  : "7091",
-        "Sprint 6"  : "7091"
-      },
-      {
-        "gh_label"  : "Feature: Receive Notifications for data upload/extract completion",
-        "No Sprint" : "6778",
-        "Sprint 1"  : "7072",
-        "Sprint 2"  : "7072",
-        "Sprint 3"  : "7082",
-        "Sprint 4"  : "7082",
-        "Sprint 5"  : "7092",
-        "Sprint 6"  : "7092"
-      },
-      {
-        "gh_label"  : "Feature: Chat with an agent",
-        "No Sprint" : "6777",
-        "Sprint 1"  : "7073",
-        "Sprint 2"  : "7073",
-        "Sprint 3"  : "7083",
-        "Sprint 4"  : "7083",
-        "Sprint 5"  : "7093",
-        "Sprint 6"  : "7093"
-      }
-    ];
 
     let getIssueComments = new Promise(function(resolve, reject) {
       GITHUB.get(`${issueUrl}/comments`, comments => {
@@ -470,30 +369,22 @@ module.exports = (robot) => {
     }).then(() => {
       return getIssue();
     }).then(obj => {
-      console.log(obj)
+      return updateAgmItem(apiId, obj);
+    }).then(msg => {
+      res.reply(msg);
     }).catch(err => {
       res.reply(err);
     })
-
-    // getIssueComments.then(data => {
-    //   apiId = getAgmId(data);
-    // }).then(() => {
-    //   return getIssue();
-    // }).then(obj => {
-    //   return updateAgmItem(apiId, obj);
-    // }).then(msg => {
-    //   res.reply(msg);
-    // }).catch(err => {
-    //   res.reply(err);
-    // })
-
   });
 
   robot.router.post('/hubot/test1', (req, res) => {
-    // console.log(req.body.issue.number);
+    let action      = req.body.action;
     let issue       = req.body.issue;
     let issueUrl    = issue.url;
-    console.log(issueUrl);
+    let issueObject = {};
+    let apiId;
+    let method;
+
     res.end('Successfully obtained issue info');
 
     const AGM       = require('agilemanager-api');
@@ -511,136 +402,17 @@ module.exports = (robot) => {
       };
     });
 
-
-    let issueObject = {};
-    let apiId;
-    let featureIds = [
-      {
-        "gh_label"  : "Feature: Single Sign On",
-        "No Sprint" : "6763",
-        "Sprint 1"  : "7064",
-        "Sprint 2"  : "7064",
-        "Sprint 3"  : "7074",
-        "Sprint 4"  : "7074",
-        "Sprint 5"  : "7084",
-        "Sprint 6"  : "7084"
-      },
-      {
-        "gh_label"  : "Feature: Marketplace Compliance Toolkit Access",
-        "No Sprint" : "6769",
-        "Sprint 1"  : "7065",
-        "Sprint 2"  : "7065",
-        "Sprint 3"  : "7075",
-        "Sprint 4"  : "7075",
-        "Sprint 5"  : "7085",
-        "Sprint 6"  : "7085"
-      },
-      {
-        "gh_label"  : "Feature: Basic RBAC Support",
-        "No Sprint" : "6770",
-        "Sprint 1"  : "7066",
-        "Sprint 2"  : "7066",
-        "Sprint 3"  : "7076",
-        "Sprint 4"  : "7076",
-        "Sprint 5"  : "7086",
-        "Sprint 6"  : "7086"
-      },
-      {
-        "gh_label"  : "Feature: Personalization",
-        "No Sprint" : "6771",
-        "Sprint 1"  : "7067",
-        "Sprint 2"  : "7067",
-        "Sprint 3"  : "7077",
-        "Sprint 4"  : "7077",
-        "Sprint 5"  : "7087",
-        "Sprint 6"  : "7087"
-      },
-      {
-        "gh_label"  : "Feature: QlikView/QlikSense Report Integration",
-        "No Sprint" : "6773",
-        "Sprint 1"  : "7068",
-        "Sprint 2"  : "7068",
-        "Sprint 3"  : "7078",
-        "Sprint 4"  : "7078",
-        "Sprint 5"  : "7088",
-        "Sprint 6"  : "7088"
-      },
-      {
-        "gh_label"  : "Feature: User data upload to Vertica",
-        "No Sprint" : "6774",
-        "Sprint 1"  : "7069",
-        "Sprint 2"  : "7069",
-        "Sprint 3"  : "7079",
-        "Sprint 4"  : "7079",
-        "Sprint 5"  : "7089",
-        "Sprint 6"  : "7089"
-      },
-      {
-        "gh_label"  : "Feature: User data upload to Hadoop",
-        "No Sprint" : "6775",
-        "Sprint 1"  : "7070",
-        "Sprint 2"  : "7070",
-        "Sprint 3"  : "7080",
-        "Sprint 4"  : "7080",
-        "Sprint 5"  : "7090",
-        "Sprint 6"  : "7090"
-      },
-      {
-        "gh_label"  : "Feature: User data download- Data Extract Capability",
-        "No Sprint" : "6776",
-        "Sprint 1"  : "7071",
-        "Sprint 2"  : "7071",
-        "Sprint 3"  : "7081",
-        "Sprint 4"  : "7081",
-        "Sprint 5"  : "7091",
-        "Sprint 6"  : "7091"
-      },
-      {
-        "gh_label"  : "Feature: Receive Notifications for data upload/extract completion",
-        "No Sprint" : "6778",
-        "Sprint 1"  : "7072",
-        "Sprint 2"  : "7072",
-        "Sprint 3"  : "7082",
-        "Sprint 4"  : "7082",
-        "Sprint 5"  : "7092",
-        "Sprint 6"  : "7092"
-      },
-      {
-        "gh_label"  : "Feature: Chat with an agent",
-        "No Sprint" : "6777",
-        "Sprint 1"  : "7073",
-        "Sprint 2"  : "7073",
-        "Sprint 3"  : "7083",
-        "Sprint 4"  : "7083",
-        "Sprint 5"  : "7093",
-        "Sprint 6"  : "7093"
-      }
-    ];
-
-    let getIssueComments = new Promise(function(resolve, reject) {
-      GITHUB.get(`${issueUrl}/comments`, comments => {
-        // need if else for success/fail
-        resolve(comments);
-      });
-    });
-
-    function getAgmId(comments) {
-      for (c of comments) {
-        if (c.body.includes('Linked to Agile Manager')) {
-          return c.body.split('API ID #')[1].slice(0, -1);
-        }
-      }
-    }
-
+    //build object with issue attributes
     function buildIssueObject(i) {
-      issueObject.title = i.title;
+      issueObject.number      = i.number;
+      issueObject.title       = i.title;
       issueObject.storyPoints = findStoryPoints(i.labels);
-      issueObject.state = convertState(i.state);
-      issueObject.priority = findPriority(i.labels);
-      issueObject.featureId = findFeatureId(i);
-      return issueObject;
+      issueObject.state       = convertState(i.state);
+      issueObject.priority    = findPriority(i.labels);
+      issueObject.featureId   = findFeatureId(i);
     }
 
+    //use issue feature label to find appropriate feature id
     function findFeatureId(i) {
       let feature = _.find(i.labels, l => l.name.includes('Feature'));
 
@@ -661,8 +433,74 @@ module.exports = (robot) => {
       return obj[sprint];
     }
 
+    function createAgmItem(obj) {
+      let resourceOptions = postOptions(obj);
+
+      return new Promise((resolve, reject) => {
+        agm.resource(resourceOptions, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            let agmDetails = [
+              body.data[0].item_id,
+              body.data[0].id,
+              `Item Created. AGM Client ID: ${body.data[0].item_id}; API ID: ${body.data[0].id}. Github Issue: ${obj.number}`
+            ]
+
+            resolve(agmDetails);
+          };
+        });
+      });
+    }
+
+    function postOptions(obj){
+      return {
+          workspaceId: '1003',
+          resource: 'backlog_items',
+          method: 'POST',
+          data: [{
+              name: obj.title,
+              subtype: 'user_story',
+              story_points: obj.storyPoints,
+              application_id: '53',
+              team_id: '159',
+              story_priority: obj.priority,
+              status: obj.state,
+              feature_id: obj.featureId
+          }]
+      };
+    }
+
+    function postGithubComment(data) {
+      let comment = {"body": `Linked to Agile Manager ID #${data[0]} (API ID #${data[1]})`}
+
+      return new Promise((resolve, reject) => {
+        GITHUB.post (`${issueUrl}/comments`, comment, reply => {
+          let issue = reply.issue_url.split('issues/')[1];
+          resolve(`Github Issue #${issue} Comment Created`);
+        });
+      });
+    }
+
+    //return all issue's comments
+    let getIssueComments = new Promise(function(resolve, reject) {
+      GITHUB.get(`${issueUrl}/comments`, comments => {
+        // need if else for success/fail
+        resolve(comments);
+      });
+    });
+
+    //scan comments for agm api id
+    function getAgmId(comments) {
+      for (c of comments) {
+        if (c.body.includes('Linked to Agile Manager')) {
+          return c.body.split('API ID #')[1].slice(0, -1);
+        }
+      }
+    }
+
     function updateAgmItem(id, obj) {
-      let resourceOptions = createResourceOptions(id, obj);
+      let resourceOptions = putOptions(id, obj);
 
       return new Promise((resolve, reject) => {
         agm.resource(resourceOptions, function(err, body) {
@@ -675,7 +513,7 @@ module.exports = (robot) => {
       });
     }
 
-    function createResourceOptions(id, obj){
+    function putOptions(id, obj){
       return {
           workspaceId: '1003',
           resource: 'backlog_items',
@@ -691,17 +529,36 @@ module.exports = (robot) => {
       };
     }
 
-    getIssueComments.then(data => {
-      apiId = getAgmId(data);
-    }).then(() => {
-      return buildIssueObject(issue);
-    }).then(obj => {
-      return updateAgmItem(apiId, obj);
-    }).then(msg => {
-      console.log(msg);
-    }).catch(err => {
-      console.error(err);
-    })
+    //start script
+    buildIssueObject(issue);
+
+    if (action === 'opened') {
+      method  = 'POST';
+
+      //screen for pull request?
+      createAgmItem(issueObject).then(data => {
+        console.log(data[2]);
+        return postGithubComment(data);
+      }).then(msg => {
+        console.log(msg);
+      }).catch(err => {
+        console.log(err);
+      })
+
+    } else {
+      method = 'PUT';
+
+      //what if issue comments more than one page?
+      getIssueComments.then(data => {
+        apiId = getAgmId(data);
+      }).then(() => {
+        return updateAgmItem(apiId, issueObject);
+      }).then(msg => {
+        console.log(msg);
+      }).catch(err => {
+        console.error(err);
+      })
+    }
 
 
   });
