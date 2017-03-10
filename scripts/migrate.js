@@ -383,7 +383,6 @@ module.exports = (robot) => {
     let issueUrl    = issue.url;
     let issueObject = {};
     let apiId;
-    let method;
 
     res.end('Successfully obtained issue info');
 
@@ -499,8 +498,8 @@ module.exports = (robot) => {
       }
     }
 
-    function updateAgmItem(id, obj) {
-      let resourceOptions = putOptions(id, obj);
+    function updateAgmItem(obj, id) {
+      let resourceOptions = putOptions(obj, id);
 
       return new Promise((resolve, reject) => {
         agm.resource(resourceOptions, function(err, body) {
@@ -513,7 +512,7 @@ module.exports = (robot) => {
       });
     }
 
-    function putOptions(id, obj){
+    function putOptions(obj, id){
       return {
           workspaceId: '1003',
           resource: 'backlog_items',
@@ -533,8 +532,6 @@ module.exports = (robot) => {
     buildIssueObject(issue);
 
     if (action === 'opened') {
-      method  = 'POST';
-
       //screen for pull request?
       createAgmItem(issueObject).then(data => {
         console.log(data[2]);
@@ -544,22 +541,19 @@ module.exports = (robot) => {
       }).catch(err => {
         console.log(err);
       })
-
     } else {
-      method = 'PUT';
-
       //what if issue comments more than one page?
       getIssueComments.then(data => {
         apiId = getAgmId(data);
       }).then(() => {
-        return updateAgmItem(apiId, issueObject);
+        return updateAgmItem(issueObject, apiId);
       }).then(msg => {
         console.log(msg);
       }).catch(err => {
         console.error(err);
       })
-    }
 
+    }
 
   });
 };
