@@ -3,3 +3,5 @@ node_modules
 .hubot_history
 /bin/hubot-pro.cmd
 /bin/hubot-anth.cmd
+JSON Examples
+bin/hubot-pro
