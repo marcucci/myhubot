@@ -1,3 +1,5 @@
+'use strict';
+
 // Description:
 //   Agilemanager gitbot script.
 //

@@ -1,24 +1,28 @@
-FROM node
+FROM ubuntu:16.10
 
-ENV HTTP_PROXY 'http://proxy.houston.hpecorp.net:8080'
-ENV HTTPS_PROXY 'http://proxy.houston.hpecorp.net:8080'
+ARG PROXY
 
-ADD lib/ /opt/myhubot/lib/
-ADD bin/ /opt/myhubot/bin/
-ADD scripts/ /opt/myhubot/scripts/
-ADD package.json /opt/myhubot/
-ADD external-scripts.json /opt/myhubot/
-ADD bin/hubot-pro /opt/myhubot/bin/
-RUN chmod 755 /opt/myhubot/bin/hubot-pro
+ENV http_proxy=$PROXY \
+    https_proxy=$PROXY
+
+RUN apt-get update
+RUN apt-get -y install expect redis-server nodejs npm
+RUN ln -s /usr/bin/nodejs /usr/bin/node
+
+RUN npm install -g coffee-script
 
 WORKDIR /opt/myhubot
 
-# -----------------------------------------------------------------------------
-# Install
-# -----------------------------------------------------------------------------
-RUN npm install --production; npm cache clean
+ADD package.json /opt/myhubot/
+
+RUN npm install --production
+
+ADD lib/ /opt/myhubot/lib/
+ADD external-scripts.json /opt/myhubot/
+ADD bin/ /opt/myhubot/bin/
+RUN chmod 755 /opt/myhubot/bin/hubot
+ADD scripts/ /opt/myhubot/scripts/
 
 EXPOSE 80
-VOLUME /opt/myhubot/scripts
 
-CMD ./bin/hubot-pro
+CMD /opt/myhubot/bin/hubot
