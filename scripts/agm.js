@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 // Description:
 //   Agilemanager gitbot script.
@@ -16,6 +16,7 @@ module.exports = function(robot) {
 
 
   // Known Issue: apiURL is ignored. Edit /node_modules/agilemanager-api/lib/main.js to set URL.
+
   var AGM_options = {
     clientId: process.env.AGM_clientId,
     clientSecret: process.env.AGM_clientSecret,

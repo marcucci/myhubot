@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
@@ -313,6 +313,7 @@ module.exports = (robot) => {
       issueObject.state = convertState(i.state);
       issueObject.priority = findPriority(i.labels);
       issueObject.featureId = findFeatureId(i);
+      issueObject.releaseId = findReleaseId(i);
     }
 
     function findFeatureId(i) {
@@ -333,6 +334,24 @@ module.exports = (robot) => {
       //use sprint # to find feature id
       let sprint = i.milestone.title.split('- ')[1];
       return obj[sprint];
+    }
+
+    function findReleaseId(i) {
+      if (i.milestone === null) {
+        return null;
+      }
+
+      let releases = {
+        'Sprint 1' : '1073',
+        'Sprint 2' : '1073',
+        'Sprint 3' : '1074',
+        'Sprint 4' : '1074',
+        'Sprint 5' : '1075',
+        'Sprint 6' : '1075'
+      }
+
+      let sprint = i.milestone.title.split('- ')[1];
+      return releases[sprint];
     }
 
     function updateAgmItem(id, obj) {
@@ -360,7 +379,8 @@ module.exports = (robot) => {
               story_points: obj.storyPoints,
               story_priority: obj.priority,
               status: obj.state, //New, In Progress, In Testing, or Done
-              feature_id: obj.featureId
+              feature_id: obj.featureId,
+              release_id: obj.releaseId
           }
       };
     }
@@ -378,7 +398,7 @@ module.exports = (robot) => {
     })
   });
 
-  robot.router.post('/hubot/test1', (req, res) => {
+  robot.router.post('/hubot/gitbot/issues', (req, res) => {
     let action      = req.body.action;
     let issue       = req.body.issue;
     let issueUrl    = issue.url;
@@ -399,6 +419,7 @@ module.exports = (robot) => {
       if (err) {
         console.log('error on login');
         console.log(JSON.stringify(err));
+        process.exitCode = 1;
       };
     });
 
@@ -410,6 +431,7 @@ module.exports = (robot) => {
       issueObject.state       = convertState(i.state);
       issueObject.priority    = findPriority(i.labels);
       issueObject.featureId   = findFeatureId(i);
+      issueObject.releaseId   = findReleaseId(i);
     }
 
     //use issue feature label to find appropriate feature id
@@ -431,6 +453,24 @@ module.exports = (robot) => {
       //use sprint # to find feature id
       let sprint = i.milestone.title.split('- ')[1];
       return obj[sprint];
+    }
+
+    function findReleaseId(i) {
+      if (i.milestone === null) {
+        return null;
+      }
+
+      let releases = {
+        'Sprint 1' : '1073',
+        'Sprint 2' : '1073',
+        'Sprint 3' : '1074',
+        'Sprint 4' : '1074',
+        'Sprint 5' : '1075',
+        'Sprint 6' : '1075'
+      }
+
+      let sprint = i.milestone.title.split('- ')[1];
+      return releases[sprint];
     }
 
     function createAgmItem(obj) {
@@ -466,7 +506,8 @@ module.exports = (robot) => {
               team_id: '159',
               story_priority: obj.priority,
               status: obj.state,
-              feature_id: obj.featureId
+              feature_id: obj.featureId,
+              release_id: obj.releaseId
           }]
       };
     }
