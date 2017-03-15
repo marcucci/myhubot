@@ -27,14 +27,14 @@ module.exports = function(robot) {
   agm.login(function (err, body) {
     if (err) {
       console.log('error on login');
-      console.log(JSON.stringify(err));
+      console.error(err);
     };
   });
 
   robot.respond(/agm test connect/i, function(res) {
-    if (!robot.auth.hasRole(res.envelope.user,'trusted')) {
-      return res.reply ("You are not authorized to make this request.")
-    };
+    // if (!robot.auth.hasRole(res.envelope.user,'trusted')) {
+    //   return res.reply ("You are not authorized to make this request.")
+    // };
 
     var queryOptions;
     queryOptions = {
@@ -58,7 +58,22 @@ module.exports = function(robot) {
   });
 
   robot.respond(/show agm #?([0-9]+)/i, function(res) {
-    var queryOptions;
+    // var AGM_options = {
+    //   clientId: process.env.AGM_clientId,
+    //   clientSecret: process.env.AGM_clientSecret,
+    //   apiURL: process.env.AGM_apiUrl
+    // };
+    //
+    // var AGM = require('agilemanager-api');
+    // var agm = new AGM(AGM_options);
+    // agm.login(function (err, body) {
+    //   if (err) {
+    //     console.log('error on login');
+    //     console.error(err);
+    //   };
+    // });
+
+    var queryOptions, replymsg;
     queryOptions = {
       workspaceId: workspaceId,
       resource: 'backlog_items',
