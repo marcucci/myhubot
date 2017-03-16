@@ -91,21 +91,6 @@ module.exports = (robot) => {
   }
 
   robot.respond(/link issues/i, res => {
-    // const AGM       = require('agilemanager-api');
-    // let AGM_options = {
-    //   clientId: process.env.AGM_clientId,
-    //   clientSecret: process.env.AGM_clientSecret,
-    //   apiURL: process.env.AGM_apiUrl
-    // };
-    // let agm         = new AGM(AGM_options);
-    //
-    // agm.login(function (err, body) {
-    //   if (err) {
-    //     console.log('error on login');
-    //     console.log(JSON.stringify(err));
-    //   };
-    // });
-
     let issuesUrl        = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100";
     let commentsUrl      = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100";
     let linkedIssues     = [];
