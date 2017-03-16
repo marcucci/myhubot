@@ -6,6 +6,8 @@ const GITHUB     = require('githubot')
 const _          = require('lodash');
 const Q          = require('q');
 const featureIds = require('../lib/featureIds');
+let agm          = require('../lib/agmLogin.js').agm;
+let agmLogin     = require('../lib/agmLogin.js').agmLogin;
 
 module.exports = (robot) => {
   //convert github issue state to agm syntax
@@ -40,21 +42,69 @@ module.exports = (robot) => {
     return null;
   }
 
-  robot.respond(/link issues/i, res => {
-    const AGM       = require('agilemanager-api');
-    let AGM_options = {
-      clientId: process.env.AGM_clientId,
-      clientSecret: process.env.AGM_clientSecret,
-      apiURL: process.env.AGM_apiUrl
-    };
-    let agm         = new AGM(AGM_options);
+  //use issue feature label to find appropriate feature id
+  function findFeatureId(i) {
+    let feature = _.find(i.labels, l => l.name.includes('Feature'));
 
-    agm.login(function (err, body) {
-      if (err) {
-        console.log('error on login');
-        console.log(JSON.stringify(err));
-      };
+    if (feature === undefined) {
+      return null;
+    }
+
+    //find featureIds object via issue's feature name
+    let obj = _.find(featureIds, f => f.gh_label === feature.name)
+
+    //if no assigned sprint, use 'no sprint' feature id
+    if (i.milestone === null) {
+      return obj['No Sprint'];
+    }
+
+    //use sprint # to find feature id
+    let sprint = i.milestone.title.split('- ')[1];
+    return obj[sprint];
+  }
+
+  function findReleaseId(i) {
+    if (i.milestone === null) {
+      return null;
+    }
+
+    let releases = {
+      'Sprint 1' : '1073',
+      'Sprint 2' : '1073',
+      'Sprint 3' : '1074',
+      'Sprint 4' : '1074',
+      'Sprint 5' : '1075',
+      'Sprint 6' : '1075'
+    }
+
+    let sprint = i.milestone.title.split('- ')[1];
+    return releases[sprint];
+  }
+
+  function getIssueComments(issueUrl) {
+    return new Promise(function(resolve, reject) {
+      GITHUB.get(`${issueUrl}/comments`, comments => {
+        // need if else for success/fail
+        resolve(comments);
+      });
     });
+  }
+
+  robot.respond(/link issues/i, res => {
+    // const AGM       = require('agilemanager-api');
+    // let AGM_options = {
+    //   clientId: process.env.AGM_clientId,
+    //   clientSecret: process.env.AGM_clientSecret,
+    //   apiURL: process.env.AGM_apiUrl
+    // };
+    // let agm         = new AGM(AGM_options);
+    //
+    // agm.login(function (err, body) {
+    //   if (err) {
+    //     console.log('error on login');
+    //     console.log(JSON.stringify(err));
+    //   };
+    // });
 
     let issuesUrl        = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues?state=all&per_page=100";
     let commentsUrl      = "https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/comments?state=all&per_page=100";
@@ -117,6 +167,8 @@ module.exports = (robot) => {
       issueObject.storyPoints = findStoryPoints(i.labels);
       issueObject.state = convertState(i.state);
       issueObject.priority = findPriority(i.labels);
+      issueObject.featureId = findFeatureId(i);
+      issueObject.releaseId = findReleaseId(i);
       allIssueObjects.push(issueObject);
     }
 
@@ -190,7 +242,9 @@ module.exports = (robot) => {
               team_id: '159',
               // theme_id: '6209',
               story_priority: obj.priority,
-              status: obj.state //New, In Progress, In Testing, or Done
+              status: obj.state, //New, In Progress, In Testing, or Done
+              feature_id: obj.featureId,
+              release_id: obj.releaseId
           }]
       };
     }
@@ -239,7 +293,9 @@ module.exports = (robot) => {
       });
     }
 
-    issuesPageCount.then(num => {
+    agmLogin.then(() => {
+      return issuesPageCount;
+    }).then(num => {
       return buildIssuesPromises(num);
     }).then(promises => {
       return Promise.all(promises);
@@ -262,32 +318,10 @@ module.exports = (robot) => {
 
   robot.respond(/update issue #?([0-9]+)/i, res => {
     //user enters github issue number in command
-    const AGM       = require('agilemanager-api');
-    let AGM_options = {
-      clientId: process.env.AGM_clientId,
-      clientSecret: process.env.AGM_clientSecret,
-      apiURL: process.env.AGM_apiUrl
-    };
-    let agm         = new AGM(AGM_options);
-
-    agm.login(function (err, body) {
-      if (err) {
-        console.log('error on login');
-        console.log(JSON.stringify(err));
-      };
-    });
-
     let num         = res.match[1];
     let issueUrl    = `https://github.hpe.com/api/v3/repos/Centers-of-Excellence/EA-Marketplace-Design-Artifacts/issues/${num}`;
     let issueObject = {};
     let apiId;
-
-    let getIssueComments = new Promise(function(resolve, reject) {
-      GITHUB.get(`${issueUrl}/comments`, comments => {
-        // need if else for success/fail
-        resolve(comments);
-      });
-    });
 
     function getAgmId(comments) {
       for (c of comments) {
@@ -314,44 +348,6 @@ module.exports = (robot) => {
       issueObject.priority = findPriority(i.labels);
       issueObject.featureId = findFeatureId(i);
       issueObject.releaseId = findReleaseId(i);
-    }
-
-    function findFeatureId(i) {
-      let feature = _.find(i.labels, l => l.name.includes('Feature'));
-
-      if (feature === undefined) {
-        return null;
-      }
-
-      //find featureIds object via issue's feature name
-      let obj = _.find(featureIds, f => f.gh_label === feature.name)
-
-      //if no assigned sprint, use 'no sprint' feature id
-      if (i.milestone === null) {
-        return obj['No Sprint'];
-      }
-
-      //use sprint # to find feature id
-      let sprint = i.milestone.title.split('- ')[1];
-      return obj[sprint];
-    }
-
-    function findReleaseId(i) {
-      if (i.milestone === null) {
-        return null;
-      }
-
-      let releases = {
-        'Sprint 1' : '1073',
-        'Sprint 2' : '1073',
-        'Sprint 3' : '1074',
-        'Sprint 4' : '1074',
-        'Sprint 5' : '1075',
-        'Sprint 6' : '1075'
-      }
-
-      let sprint = i.milestone.title.split('- ')[1];
-      return releases[sprint];
     }
 
     function updateAgmItem(id, obj) {
@@ -385,7 +381,9 @@ module.exports = (robot) => {
       };
     }
 
-    getIssueComments.then(data => {
+    agmLogin.then(() => {
+      return getIssueComments(issueUrl);
+    }).then(data => {
       apiId = getAgmId(data);
     }).then(() => {
       return getIssue();
@@ -407,22 +405,6 @@ module.exports = (robot) => {
 
     res.end('Successfully obtained issue info');
 
-    const AGM       = require('agilemanager-api');
-    let AGM_options = {
-      clientId: process.env.AGM_clientId,
-      clientSecret: process.env.AGM_clientSecret,
-      apiURL: process.env.AGM_apiUrl
-    };
-    let agm         = new AGM(AGM_options);
-
-    agm.login(function (err, body) {
-      if (err) {
-        console.log('error on login');
-        console.log(JSON.stringify(err));
-        process.exitCode = 1;
-      };
-    });
-
     //build object with issue attributes
     function buildIssueObject(i) {
       issueObject.number      = i.number;
@@ -434,44 +416,44 @@ module.exports = (robot) => {
       issueObject.releaseId   = findReleaseId(i);
     }
 
-    //use issue feature label to find appropriate feature id
-    function findFeatureId(i) {
-      let feature = _.find(i.labels, l => l.name.includes('Feature'));
-
-      if (feature === undefined) {
-        return null;
-      }
-
-      //find featureIds object via issue's feature name
-      let obj = _.find(featureIds, f => f.gh_label === feature.name)
-
-      //if no assigned sprint, use 'no sprint' feature id
-      if (i.milestone === null) {
-        return obj['No Sprint'];
-      }
-
-      //use sprint # to find feature id
-      let sprint = i.milestone.title.split('- ')[1];
-      return obj[sprint];
-    }
-
-    function findReleaseId(i) {
-      if (i.milestone === null) {
-        return null;
-      }
-
-      let releases = {
-        'Sprint 1' : '1073',
-        'Sprint 2' : '1073',
-        'Sprint 3' : '1074',
-        'Sprint 4' : '1074',
-        'Sprint 5' : '1075',
-        'Sprint 6' : '1075'
-      }
-
-      let sprint = i.milestone.title.split('- ')[1];
-      return releases[sprint];
-    }
+    // //use issue feature label to find appropriate feature id
+    // function findFeatureId(i) {
+    //   let feature = _.find(i.labels, l => l.name.includes('Feature'));
+    //
+    //   if (feature === undefined) {
+    //     return null;
+    //   }
+    //
+    //   //find featureIds object via issue's feature name
+    //   let obj = _.find(featureIds, f => f.gh_label === feature.name)
+    //
+    //   //if no assigned sprint, use 'no sprint' feature id
+    //   if (i.milestone === null) {
+    //     return obj['No Sprint'];
+    //   }
+    //
+    //   //use sprint # to find feature id
+    //   let sprint = i.milestone.title.split('- ')[1];
+    //   return obj[sprint];
+    // }
+    //
+    // function findReleaseId(i) {
+    //   if (i.milestone === null) {
+    //     return null;
+    //   }
+    //
+    //   let releases = {
+    //     'Sprint 1' : '1073',
+    //     'Sprint 2' : '1073',
+    //     'Sprint 3' : '1074',
+    //     'Sprint 4' : '1074',
+    //     'Sprint 5' : '1075',
+    //     'Sprint 6' : '1075'
+    //   }
+    //
+    //   let sprint = i.milestone.title.split('- ')[1];
+    //   return releases[sprint];
+    // }
 
     function createAgmItem(obj) {
       let resourceOptions = postOptions(obj);
@@ -523,14 +505,6 @@ module.exports = (robot) => {
       });
     }
 
-    //return all issue's comments
-    let getIssueComments = new Promise(function(resolve, reject) {
-      GITHUB.get(`${issueUrl}/comments`, comments => {
-        // need if else for success/fail
-        resolve(comments);
-      });
-    });
-
     //scan comments for agm api id
     function getAgmId(comments) {
       for (c of comments) {
@@ -575,7 +549,9 @@ module.exports = (robot) => {
 
     if (action === 'opened') {
       //screen for pull request?
-      createAgmItem(issueObject).then(data => {
+      agmLogin.then(() => {
+        return createAgmItem(issueObject);
+      }).then(data => {
         console.log(data[2]);
         return postGithubComment(data);
       }).then(msg => {
@@ -585,7 +561,9 @@ module.exports = (robot) => {
       })
     } else {
       //what if issue comments more than one page?
-      getIssueComments.then(data => {
+      agmLogin.then(() => {
+        return getIssueComments(issueUrl);
+      }).then(data => {
         apiId = getAgmId(data);
       }).then(() => {
         return updateAgmItem(issueObject, apiId);

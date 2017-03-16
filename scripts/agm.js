@@ -8,29 +8,13 @@
 //  show agm <id> - show details about a specific backlog item
 //  list agm themes - show a lit of all agile manager themes
 //  agm test create - create a single use story as a test
+const agmFields = 'id,name,item_id,status,author,creation_date,last_modified,subtype';
+let agm         = require('../lib/agmLogin.js').agm;
+let agmLogin    = require('../lib/agmLogin.js').agmLogin;
+// let workspaceId = '1003';
 
-var workspaceId = '1003';
-const agmStandardFields = 'id,name,item_id,status,author,creation_date,last_modified,subtype';
-
-module.exports = function(robot) {
-
-
+module.exports = (robot) => {
   // Known Issue: apiURL is ignored. Edit /node_modules/agilemanager-api/lib/main.js to set URL.
-
-  var AGM_options = {
-    clientId: process.env.AGM_clientId,
-    clientSecret: process.env.AGM_clientSecret,
-    apiURL: process.env.AGM_apiUrl
-  };
-
-  var AGM = require('agilemanager-api');
-  var agm = new AGM(AGM_options);
-  agm.login(function (err, body) {
-    if (err) {
-      console.log('error on login');
-      console.error(err);
-    };
-  });
 
   robot.respond(/agm test connect/i, function(res) {
     // if (!robot.auth.hasRole(res.envelope.user,'trusted')) {
@@ -39,23 +23,36 @@ module.exports = function(robot) {
 
     var queryOptions;
     queryOptions = {
-      workspaceId: workspaceId,
+      workspaceId: '1003',
       resource: 'backlog_items',
       query: 'id>1',
-      fields: agmStandardFields,
+      fields: agmFields,
       orderBy: 'name',
       limit: 1,
       offset: 0
     };
 
-    agm.query(queryOptions, function(err, body) {
-      if (err) {
-        console.log ('error on query');
-      } else {
-        return res.reply ("Agile Manager connection and query successful.\n")
-      };
+    function agmQuery(queryOptions) {
+      return new Promise(function(resolve, reject) {
+        agm.query(queryOptions, function(err, body) {
+          if (err) {
+            console.log ('error on query');
+            reject(err);
+          } else {
+            resolve("Agile Manager connection and query successful")
+          };
+        });
+      });
+    }
 
-    });
+    agmLogin.then(() => {
+      return agmQuery(queryOptions);
+    }).then(data => {
+      res.reply(data);
+    }).catch(err => {
+      console.error(err)
+    })
+
   });
 
   robot.respond(/show agm #?([0-9]+)/i, function(res) {
@@ -76,10 +73,10 @@ module.exports = function(robot) {
 
     var queryOptions, replymsg;
     queryOptions = {
-      workspaceId: workspaceId,
+      workspaceId: '1003',
       resource: 'backlog_items',
       query: 'id=' + res.match[1],
-      fields: agmStandardFields,
+      fields: agmFields,
       orderBy: 'name',
       limit: 1,
       offset: 0
@@ -111,10 +108,10 @@ module.exports = function(robot) {
   robot.respond(/show agm created items/i, function(res) {
     var queryOptions;
     queryOptions = {
-      workspaceId: workspaceId,
+      workspaceId: '1003',
       resource: 'backlog_items',
       query: 'author=\'' + process.env.AGM_clientId + '\'',
-      fields: agmStandardFields,
+      fields: agmFields,
       orderBy: 'id',
       limit: 1000,
       offset: 0
@@ -146,7 +143,7 @@ module.exports = function(robot) {
   robot.respond(/list agm themes/i, function(res) {
     var queryOptions;
     queryOptions = {
-      workspaceId: workspaceId,
+      workspaceId: '1003',
       resource: 'themes',
       query: 'id>0',
       fields: 'id,name,owner',
@@ -173,7 +170,7 @@ module.exports = function(robot) {
 
   robot.respond(/agm delete #?([0-9]+)/i, function(res) {
     var resourceOptions = {
-        workspaceId: workspaceId,
+        workspaceId: '1003',
         resource: 'backlog_items',
         entityId: res.match[1],
         method: 'DELETE'
@@ -192,7 +189,7 @@ module.exports = function(robot) {
 
   robot.respond(/agm test create/i, function(res) {
     var resourceOptions = {
-        workspaceId: workspaceId,
+        workspaceId: '1003',
         resource: 'backlog_items',
         method: 'POST',
         data: [{
