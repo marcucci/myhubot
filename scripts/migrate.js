@@ -98,6 +98,7 @@ module.exports = (robot) => {
     let allIssueObjects  = [];
     let issuesPromises   = [];
     let commentsPromises = [];
+    //let agmLogin     = require('../lib/agmLogin.js').agmLogin;
 
     //get page count of github issues (max 100 issues per page)
     let issuesPageCount = new Promise((resolve, reject) => {
@@ -278,7 +279,7 @@ module.exports = (robot) => {
       });
     }
 
-    agmLogin.then(() => {
+    agmLogin(agm).then(() => {
       return issuesPageCount;
     }).then(num => {
       return buildIssuesPromises(num);
@@ -366,7 +367,7 @@ module.exports = (robot) => {
       };
     }
 
-    agmLogin.then(() => {
+    agmLogin(agm).then(() => {
       return getIssueComments(issueUrl);
     }).then(data => {
       apiId = getAgmId(data);
@@ -400,45 +401,6 @@ module.exports = (robot) => {
       issueObject.featureId   = findFeatureId(i);
       issueObject.releaseId   = findReleaseId(i);
     }
-
-    // //use issue feature label to find appropriate feature id
-    // function findFeatureId(i) {
-    //   let feature = _.find(i.labels, l => l.name.includes('Feature'));
-    //
-    //   if (feature === undefined) {
-    //     return null;
-    //   }
-    //
-    //   //find featureIds object via issue's feature name
-    //   let obj = _.find(featureIds, f => f.gh_label === feature.name)
-    //
-    //   //if no assigned sprint, use 'no sprint' feature id
-    //   if (i.milestone === null) {
-    //     return obj['No Sprint'];
-    //   }
-    //
-    //   //use sprint # to find feature id
-    //   let sprint = i.milestone.title.split('- ')[1];
-    //   return obj[sprint];
-    // }
-    //
-    // function findReleaseId(i) {
-    //   if (i.milestone === null) {
-    //     return null;
-    //   }
-    //
-    //   let releases = {
-    //     'Sprint 1' : '1073',
-    //     'Sprint 2' : '1073',
-    //     'Sprint 3' : '1074',
-    //     'Sprint 4' : '1074',
-    //     'Sprint 5' : '1075',
-    //     'Sprint 6' : '1075'
-    //   }
-    //
-    //   let sprint = i.milestone.title.split('- ')[1];
-    //   return releases[sprint];
-    // }
 
     function createAgmItem(obj) {
       let resourceOptions = postOptions(obj);
@@ -534,7 +496,7 @@ module.exports = (robot) => {
 
     if (action === 'opened') {
       //screen for pull request?
-      agmLogin.then(() => {
+      agmLogin(agm).then(() => {
         return createAgmItem(issueObject);
       }).then(data => {
         console.log(data[2]);
@@ -546,7 +508,7 @@ module.exports = (robot) => {
       })
     } else {
       //what if issue comments more than one page?
-      agmLogin.then(() => {
+      agmLogin(agm).then(() => {
         return getIssueComments(issueUrl);
       }).then(data => {
         apiId = getAgmId(data);

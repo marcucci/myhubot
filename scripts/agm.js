@@ -45,7 +45,7 @@ module.exports = (robot) => {
       });
     }
 
-    agmLogin.then(() => {
+    agmLogin(agm).then(() => {
       return agmQuery(queryOptions);
     }).then(data => {
       res.reply(data);
@@ -174,7 +174,7 @@ module.exports = (robot) => {
       });
     }
 
-    agmLogin.then(() => {
+    agmLogin(agm).then(() => {
       return agmDelete(resourceOptions);
     }).then(data => {
       res.reply(data);
