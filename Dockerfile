@@ -6,8 +6,9 @@ ENV http_proxy=$PROXY \
     https_proxy=$PROXY
 
 RUN apt-get update
-RUN apt-get -y install expect redis-server nodejs npm
-RUN ln -s /usr/bin/nodejs /usr/bin/node
+RUN apt-get -y install curl
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN apt-get -y install expect redis-server nodejs
 
 WORKDIR /opt/myhubot
 
