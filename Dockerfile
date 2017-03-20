@@ -24,4 +24,4 @@ ADD scripts/ /opt/myhubot/scripts/
 
 EXPOSE 80
 
-CMD /opt/myhubot/bin/hubot
+CMD /opt/myhubot/bin/hubot-pro
