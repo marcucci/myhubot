@@ -390,6 +390,7 @@ module.exports = (robot) => {
     let apiId;
 
     res.end('Successfully obtained issue info');
+    console.log (`\nIncoming: Issue ${issue.number} action of ${action}`);
 
     //build object with issue attributes
     function buildIssueObject(i) {
